@@ -1,8 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-/*⭑⭒━━━✦❘༻☾⋆⁺₊✧ BUGHUNT ✧₊⁺⋆☽༺❘✦━━━⭒⭑*/
-
 const RUNTIME_GLOBALS = new Set([
     'fkontak', 'rcanal', 'fake', 'estilo', 'foto', 'nome', 'readMore',
     'canaleRD', 'authsticker', 'packsticker', 'nomepack', 'nomebot',
