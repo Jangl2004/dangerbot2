@@ -132,30 +132,31 @@ const question = (t) => {
 let opzione;
 if (!methodCodeQR && !methodCode && !fs.existsSync(`./${authFile}/creds.json`)) {
     do {
-        const violet1 = chalk.hex('#9B59B6');
-        const violet2 = chalk.hex('#8E44AD');
-        const violet3 = chalk.hex('#7D3C98');
-        const violet4 = chalk.hex('#5B2C6F');
-        const softText = chalk.hex('#D7BDE2');
+    const cyan1 = chalk.hex('#00BFFF');     // DeepSkyBlue
+    const cyan2 = chalk.hex('#00CED1');     // DarkTurquoise
+    const cyan3 = chalk.hex('#20B2AA');     // LightSeaGreen
+    const green = chalk.hex('#2ECC71');     // Emerald
+    const whiteSoft = chalk.hex('#ECF0F1'); // Soft white
+    const redSoft = chalk.hex('#E74C3C');   // Soft red
 
-        const a = violet1('╭━━━━━━━━━━━━━• ACCESS PANEL •━━━━━━━━━━━━━');
-const b = violet1('╰━━━━━━━━━━━━━• END SESSION •━━━━━━━━━━━━━');
-const linea = violet2('   ────────┼┼────────┼────────┼┼────────');
-const sm = violet3('SELEZIONE MODALITÀ DI ACCESSO');
+    const a = cyan1('╭━━━━━━━━━━━━━• ACCESS PANEL •━━━━━━━━━━━━━');
+    const b = cyan1('╰━━━━━━━━━━━━━• END SESSION •━━━━━━━━━━━━━');
+    const linea = cyan2('   ────────┼┼────────┼────────┼┼────────');
+    const sm = cyan3.bold('SELEZIONE MODALITÀ DI ACCESSO');
 
-const qr = violet4(' ┌─⭓') + ' ' + chalk.bold.hex('#D2B4DE')('1. Login tramite QR');
-const codice = violet4(' └─⭓') + ' ' + chalk.bold.hex('#D2B4DE')('2. Login con codice');
+    const qr = cyan3(' ┌─⭓') + ' ' + chalk.bold.white('1. Login tramite QR');
+    const codice = cyan3(' └─⭓') + ' ' + chalk.bold.white('2. Login con codice');
 
-const istruzioni = [
-    violet4(' ┌─⭓') + softText.italic(' Seleziona una modalità disponibile.'),
-    violet4(' └─⭓') + softText.italic(' Premi Invio per continuare.'),
-    softText.italic(''),
-    violet1.italic('                access system • deadly'),
-];
+    const istruzioni = [
+        cyan3(' ┌─⭓') + whiteSoft.italic(' Seleziona una modalità disponibile.'),
+        cyan3(' └─⭓') + whiteSoft.italic(' Premi Invio per continuare.'),
+        whiteSoft.italic(''),
+        cyan1.italic('                access system • deadly'),
+    ];
 
-const prompt = chalk.hex('#BB8FCE').bold('\n⌯ selezione ➤ ');
+    const prompt = green.bold('\n⌯ selezione ➤ ');
 
-opzione = await question(`\n
+    opzione = await question(`\n
 ${a}
 
           ${sm}
@@ -170,14 +171,14 @@ ${istruzioni.join('\n')}
 ${b}
 ${prompt}`);
 
-if (!/^[1-2]$/.test(opzione)) {
-    console.log(`\n${chalk.hex('#E74C3C').bold('✖ SELEZIONE NON VALIDA')}
+    if (!/^[1-2]$/.test(opzione)) {
+        console.log(`\n${redSoft.bold('✖ SELEZIONE NON VALIDA')}
 
-${chalk.hex('#F5EEF8')('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
-${chalk.hex('#EC7063').bold('⚠️ Sono ammessi solo i numeri')} ${chalk.bold.green('1')} ${chalk.hex('#EC7063').bold('o')} ${chalk.bold.green('2')}
-${chalk.hex('#FADBD8')('┌─⭓ Nessuna lettera o simbolo')}
-${chalk.hex('#FADBD8')('└─⭓ Copia il numero dell\'opzione desiderata e incollalo')}
-${chalk.hex('#BB8FCE').italic('\n✧ Suggerimento: Se hai dubbi, scrivi al creatore +393476686131')}
+${whiteSoft('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
+${redSoft.bold('⚠️ Sono ammessi solo i numeri')} ${chalk.bold.green('1')} ${redSoft.bold('o')} ${chalk.bold.green('2')}
+${whiteSoft('┌─⭓ Nessuna lettera o simbolo')}
+${whiteSoft('└─⭓ Copia il numero dell\'opzione desiderata e incollalo')}
+${green.italic('\n✧ Suggerimento: Se hai dubbi, scrivi al creatore +393476686131')}
 `);
         }
     } while ((opzione !== '1' && opzione !== '2') || fs.existsSync(`./${authFile}/creds.json`));
