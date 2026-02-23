@@ -3,7 +3,7 @@ const {
   generateWAMessage,
   areJidsSameUser,
   decryptPollVote,
-} = (await import('@realvare/based')).default;
+} = (await import('@realvare/baileys')).default;
 
 export async function all(m, chatUpdate) {
   if (m.isBaileys || !m.message) return;
