@@ -1,4 +1,4 @@
-import { WAMessageStubType } from '@realvare/based'
+import { WAMessageStubType } from '@realvare/baileys'
 import axios from 'axios'
 
 /* =======================
