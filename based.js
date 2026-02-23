@@ -261,38 +261,25 @@ global.store.bind(global.conn.ev);
 if (!fs.existsSync(`./${authFile}/creds.json`)) {
     if (opzione === '2' || methodCode) {
         opzione = '2';
-        if (!conn.authState.creds.registered) {
-            let addNumber;
+        if (!state.creds.registered) {
 
-            if (phoneNumber) {
-                addNumber = phoneNumber.replace(/[^0-9]/g, '');
-            } else {
-                phoneNumber = await question(
-                    chalk.hex('#00CED1').bold(
-                        `\n📲 INSERISCI IL NUMERO WHATSAPP\n`
-                    ) +
-                    chalk.hex('#ECF0F1')(
-                        `Esempio: +393471234567\n`
-                    ) +
-                    chalk.hex('#2ECC71').bold('━━► ')
-                );
+    let addNumber = phoneNumber ? phoneNumber.replace(/\D/g, '') : await question(
+        chalk.hex('#00CED1').bold('📲 INSERISCI IL NUMERO WHATSAPP\n') +
+        chalk.hex('#ECF0F1')('Esempio: 393471234567\n') +
+        chalk.hex('#2ECC71').bold('━━► ')
+    );
 
-                addNumber = phoneNumber.replace(/\D/g, '');
-                if (!phoneNumber.startsWith('+')) phoneNumber = `+${phoneNumber}`;
-            }
+    console.log("Numero usato:", addNumber);
 
-            setTimeout(async () => {
-                let codeBot = await conn.requestPairingCode(addNumber, 'NEXUSBOT');
-                codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
+    setTimeout(async () => {
+        let codeBot = await conn.requestPairingCode(addNumber, 'NEXUSBOT');
+        codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
 
-                console.log(
-                    chalk.hex('#00BFFF').bold('\n🔗 CODICE DI ABBINAMENTO 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓\n'),
-                    chalk.hex('#2ECC71').bold(codeBot),
-                    '\n'
-                );
-            }, 3000);
-        }
-    }
+        console.log(
+            chalk.hex('#00BFFF').bold('🔗 CODICE DI ABBINAMENTO 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓\n'),
+            chalk.hex('#2ECC71').bold(codeBot)
+        );
+    }, 3000);
 }
 conn.isInit = false;
 conn.well = false;
