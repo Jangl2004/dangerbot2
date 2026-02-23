@@ -315,26 +315,29 @@ async function connectionUpdate(update) {
         global.connectionMessagesPrinted = {};
         if (!global.isLogoPrinted) {
             const finchevedotuttoviolaviola = [
-    '#00BFFF', '#00CED1', '#20B2AA', '#2ECC71', '#2ECC71', '#2ECC71', '#20B2AA', '#00CED1'
+    '#00BFFF', '#00CED1', '#20B2AA', '#2ECC71', '#2ECC71', '#20B2AA', '#00CED1', '#00BFFF',
+    '#00BFFF', '#00CED1', '#20B2AA', '#2ECC71', '#2ECC71', '#20B2AA'
 ];
 
 const nexsusbot = [
-    ` CONNESSIONE`,
-    `█▄  █  ██████  ▀▄  ▄▀  ██████  █    █  ██████ `,
-    `█ █ █  █        ██     █       █    █  █      `,
-    `█  ▀█  ████      ██    ██████  █    █  ██████ `,
-    `█   █  █        ██          █  █    █       █ `,
-    `█   █  ██████  ▄▀  ▀▄  ██████  ██████  ██████ `,
-    `                                              `,
-    `           ████▄   ████▄  ██████              `,
-    `           █   █  █    █    ██                `,
-    `           ████▀  █    █    ██                `,
-    `           █   █  █    █    ██                `,
-    `           ████▀   ████▀    ██                `
+    `███╗   ██╗███████╗██╗  ██╗███████╗██╗   ██╗███████╗`,
+    `████╗  ██║██╔════╝╚██╗██╔╝██╔════╝██║   ██║██╔════╝`,
+    `██╔██╗ ██║█████╗   ╚███╔╝ █████╗  ██║   ██║███████╗`,
+    `██║╚██╗██║██╔══╝   ██╔██╗ ╚════██╗██║   ██║╚════██║`,
+    `██║ ╚████║███████╗██╔╝ ██╗███████║╚██████╔╝███████║`,
+    `╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚══════╝`,
+    `                                                  `,
+    `          ██████╗  ██████╗ ████████╗              `,
+    `          ██╔══██╗██╔═══██╗╚══██╔══╝              `,
+    `          ██████╔╝██║   ██║   ██║                 `,
+    `          ██╔══██╗██║   ██║   ██║                 `,
+    `          ██████╔╝╚██████╔╝   ██║                 `,
+    `          ╚═════╝  ╚═════╝    ╚═╝                 `
 ];
 
 nexsusbot.forEach((line, i) => {
     const color = finchevedotuttoviolaviola[i] || finchevedotuttoviolaviola[finchevedotuttoviolaviola.length - 1];
+    // Grassetto e colore applicati direttamente a ogni riga
     console.log(chalk.hex(color).bold(line));
 });
 
