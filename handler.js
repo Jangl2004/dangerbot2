@@ -534,7 +534,12 @@ export async function handler(chatUpdate) {
                     await this.sendMessage(m.chat, { text: `🚫 Sei stato mutato, non puoi usare i comandi.` }, { quoted: m }).catch(e => console.error('[ERRORE] Errore nell\'invio del messaggio:', e))
                     return
                 }
-
+                
+                if (m.chat in global.db.data.chats) {
+                    let chat = global.db.data.chats[m.chat]
+                    if (name != 'creatore-sbanchat.js' && chat?.isBanned)
+                        return
+                }
                 if (chat.modoadmin && !isOwner && !isSam && m.isGroup && !isAdmin) return
                 if (settings.soloCreatore && !isSam) return // isSam è il vecchio isRowner
                 if (plugin.sam && !isSam) {
