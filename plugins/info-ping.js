@@ -4,6 +4,7 @@ import os from 'os';
 import { performance } from 'perf_hooks';
 
 let handler = async (m, { conn, usedPrefix }) => {
+
   try {
     const uptimeMs = process.uptime() * 1000;
     const uptimeStr = clockString(uptimeMs);
@@ -34,7 +35,7 @@ let handler = async (m, { conn, usedPrefix }) => {
       year: 'numeric',
     });
 
-    const textMsg =`
+    const textMsg = `
 ⟦ 𝐒𝐓𝐀𝐓𝐎 𝐁𝐎𝐓 ⟧
 
 ╭───────────────
@@ -48,13 +49,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 `.trim();
 
     await conn.sendMessage(m.chat, {
-      text: textMsg,
-      footer: "PING BY DANGER BOT",
-      buttons: [
-        { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
-        { buttonId: usedPrefix + "menu", buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 }
-      ],
-      headerType: 1
+      text: textMsg
     }, { quoted: m });
 
   } catch (err) {
