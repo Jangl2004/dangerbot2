@@ -28,26 +28,22 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 Seleziona un pannello qui sotto 👇
 `.trim();
 
-await conn.sendMessage(message.chat, {
-  text: menuText,
-  footer: '⚡ Danger Bot System',
-  title: 'DANGER BOT CONTROL PANEL',
-  buttonText: '📌 Apri pannelli',
-  sections: [
-    {
-      title: 'Seleziona un pannello',
-      rows: [
-        { title: '🛡 Menu Admin', rowId: `${usedPrefix}menuadmin` },
-        { title: '👑 Menu Owner', rowId: `${usedPrefix}menuowner` },
-        { title: '🫅🏻 Moderazione', rowId: `${usedPrefix}menumod` },
-        { title: '🚨 Funzioni', rowId: `${usedPrefix}menufunzioni` },
-        { title: '🎮 Giochi', rowId: `${usedPrefix}menugiochi` },
-        { title: '📱 Area Digitale', rowId: `${usedPrefix}menuludopatici` }
-      ]
-    }
-  ],
-  mentions: [userId]
-}, { quoted: message });
+    const buttons = [
+        { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: '🛡 Menu Admin' }, type: 1 },
+        { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: '👑 Menu Owner' }, type: 1 },
+        { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: '🫅🏻 Moderazione' }, type: 1 },
+        { buttonId: `${usedPrefix}menufunzioni`, buttonText: { displayText: '🚨 Funzioni' }, type: 1 },
+        { buttonId: `${usedPrefix}menugiochi`, buttonText: { displayText: '🎮 Giochi' }, type: 1 },
+        { buttonId: `${usedPrefix}menuludopatici`, buttonText: { displayText: '📱 Area Digitale' }, type: 1 }
+    ];
+
+    await conn.sendMessage(message.chat, {
+        text: menuText,
+        footer: '⚡ Danger Bot System',
+        buttons: buttons,
+        headerType: 1,
+        mentions: [userId]
+    });
 };
 
 // Funzione per convertire ms in gg:hh:mm:ss
