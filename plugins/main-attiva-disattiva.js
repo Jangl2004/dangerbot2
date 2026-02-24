@@ -13,7 +13,7 @@ let handler = async (m, { conn, command, args, isAdmin, isOwner, isROwner }) => 
   /* ====== GRAFICA 𝐍𝚵𝑿𝐒𝐔𝐒 ====== */
   const box = (title, lines) =>
 `╔═══━─━─━─━─━─━─━═══╗
-   ⚡ 𝐍𝚵𝑿𝐒𝐔𝐒 • ${title} ⚡
+   ⚡ DANGERBOT • ${title} ⚡
 ╚═══━─━─━─━─━─━─━═══╝
 ${lines.map(l => `➤ ${l}`).join('\n')}
 ━━━━━━━━━━━━━━━━━━`
@@ -54,7 +54,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiLink = isEnable
       result = box('🔗 𝐀𝐍𝐓𝐈𝐋𝐈𝐍𝐊', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca portali WhatsApp proibiti del Nexus'
+        'Blocca portali WhatsApp proibiti di Danger'
       ])
       break
 
@@ -66,7 +66,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiInsta = isEnable
       result = box('📸 𝐀𝐍𝐓𝐈𝐈𝐍𝐒𝐓𝐀', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca link Instagram per protezione Nexus'
+        'Blocca link Instagram per protezione Danger'
       ])
       break
 
@@ -78,7 +78,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiTelegram = isEnable
       result = box('✈️ 𝐀𝐍𝐓𝐈𝐓𝐄𝐋𝐄𝐆𝐑𝐀𝐌', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca link Telegram nel Nexus'
+        'Blocca link Telegram nel Danger'
       ])
       break
 
@@ -90,7 +90,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiTiktok = isEnable
       result = box('🎵 𝐀𝐍𝐓𝐈𝐓𝐈𝐊𝐓𝐎𝐊', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca link TikTok per la sicurezza Nexus'
+        'Blocca link TikTok per la sicurezza Danger'
       ])
       break
 
@@ -102,7 +102,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiTag = isEnable
       result = box('🏷️ 𝐀𝐍𝐓𝐈𝐓𝐀𝐆', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca tag e menzioni di massa nel Nexus'
+        'Blocca tag e menzioni di massa nel Danger'
       ])
       break
 
@@ -115,7 +115,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       result = box('💣 𝐀𝐍𝐓𝐈𝐍𝐔𝐊𝐄', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
         'Protezione contro distruzione di massa',
-        isEnable ? '🛡️ Il gruppo è sotto protezione 𝐍𝚵𝑿𝐒𝐔𝐒' : '☠️ Difese abbassate'
+        isEnable ? '🛡️ Il gruppo è sotto protezione Danger' : '☠️ Difese abbassate'
       ])
       break
 
@@ -127,7 +127,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antigore = isEnable
       result = box('🚫 𝐀𝐍𝐓𝐈𝐆𝐎𝐑𝐄', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Purificazione contenuti violenti del Nexus'
+        'Purificazione contenuti violenti del Danger'
       ])
       break
 
@@ -140,7 +140,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiporno = isEnable
       result = box('🔞 𝐀𝐍𝐓𝐈𝐏𝐎𝐑𝐍𝐎', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Purificazione contenuti corrotti del Nexus'
+        'Purificazione contenuti corrotti del Danger'
       ])
       break
 
@@ -153,7 +153,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.modoadmin = isEnable
       result = box('🛡️ 𝐌𝐎𝐃𝐎 𝐀𝐃𝐌𝐈𝐍', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Solo gli eletti possono usare i comandi Nexus'
+        'Solo gli eletti possono usare i comandi Danger'
       ])
       break
 
@@ -166,7 +166,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.welcome = isEnable
       result = box('👋 𝐑𝐈𝐓𝐔𝐀𝐋𝐄 𝐃𝐈 𝐈𝐍𝐆𝐑𝐄𝐒𝐒𝐎', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Accoglienza Nexus attiva'
+        'Accoglienza Danger attiva'
       ])
       break
 
@@ -179,7 +179,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.goodbye = isEnable
       result = box('🚪 𝐑𝐈𝐓𝐔𝐀𝐋𝐄 𝐃𝐈 𝐔𝐒𝐂𝐈𝐓𝐀', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Messaggio di congedo Nexus'
+        'Messaggio di congedo Danger'
       ])
       break
 
@@ -191,7 +191,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       bot.antiprivato = isEnable
       result = box('🔒 𝐀𝐍𝐓𝐈𝐏𝐑𝐈𝐕𝐀𝐓𝐎', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca messaggi privati al bot Nexus'
+        'Blocca messaggi privati al bot Danger'
       ])
       break
 
@@ -203,7 +203,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antiBot = isEnable
       result = box('🤖 𝐀𝐍𝐓𝐈𝐁𝐎𝐓', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca bot esterni non autorizzati nel Nexus'
+        'Blocca bot esterni non autorizzati nel Danger'
       ])
       break
 
@@ -215,7 +215,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antispam = isEnable
       result = box('🛑 𝐀𝐍𝐓𝐈𝐒𝐏𝐀𝐌', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Protezione contro spam e flood Nexus'
+        'Protezione contro spam e flood Danger'
       ])
       break
 
@@ -227,7 +227,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       chat.antitrava = isEnable
       result = box('🧱 𝐀𝐍𝐓𝐈𝐓𝐑𝐀𝐕𝐀', [
         `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
-        'Blocca messaggi crash e trappole Nexus'
+        'Blocca messaggi crash e trappole Danger'
       ])
       break
 
