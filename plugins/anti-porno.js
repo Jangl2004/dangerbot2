@@ -1,5 +1,5 @@
 // by Sam aka vare https://github.com/realvare
-import { downloadContentFromMessage } from '@realvare/based'
+import { downloadContentFromMessage } from '@realvare/baileys'
 import crypto from 'crypto'
 import fetch from 'node-fetch'
 import FormData from 'form-data'
