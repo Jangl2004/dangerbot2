@@ -1,18 +1,16 @@
 const handler = async (message, { conn, usedPrefix = '.' }) => {
 
-    const userId = message.sender;
-    const groupId = message.isGroup ? message.chat : null;
-
     const userCount = Object.keys(global.db?.data?.users || {}).length;
 
-    const menuText = `
+    const header = `
 🩸 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓 *MENU GIOCHI* 🩸
-
 ════════════════════
 👥 Utenti registrati: *${userCount}*
 ════════════════════
+`.trim();
 
-🎮 𝐆𝐀𝐌𝐄 𝐌𝐄𝐓𝐑𝐈𝐂𝐈 & DIVERTIMENTO
+    const sezione1 = `
+🎮 𝐆𝐀𝐌𝐄 𝐌𝐄𝐓𝐑𝐈𝐂𝐈 & DIVERTIMENTO (1)
 ➤ ${usedPrefix}bellometro 🥰
 ➤ ${usedPrefix}gaymetro 🌈
 ➤ ${usedPrefix}lesbiometro 💖
@@ -29,6 +27,10 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}trans 🏳️‍⚧️
 ➤ ${usedPrefix}tris ❌⭕
 ➤ ${usedPrefix}meme 🤣
+`.trim();
+
+    const sezione2 = `
+🎮 𝐆𝐀𝐌𝐄 𝐌𝐄𝐓𝐑𝐈𝐂𝐈 & DIVERTIMENTO (2)
 ➤ ${usedPrefix}cibo 🍣 
 ➤ ${usedPrefix}bandiera 🚩
 ➤ ${usedPrefix}classificabandiera 🏆
@@ -43,12 +45,13 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}famiglia 🧑‍🧑‍🧒‍🧒
 ➤ ${usedPrefix}toglifiglio 👣
 ➤ ${usedPrefix}togliamante 💔
-
 ════════════════════
 `.trim();
 
-    // INVIO SOLO TESTO
-    await conn.sendMessage(message.chat, { text: menuText });
+    // Invia messaggi separati
+    await conn.sendMessage(message.chat, { text: header });
+    await conn.sendMessage(message.chat, { text: sezione1 });
+    await conn.sendMessage(message.chat, { text: sezione2 });
 };
 
 handler.help = ['menugiochi'];
