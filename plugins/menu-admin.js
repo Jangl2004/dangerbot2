@@ -1,16 +1,26 @@
 const handler = async (message, { conn, usedPrefix = '.' }) => {
 
-    const menuText = `
-🛡️ 𝐍𝚵𝑿𝐒𝐔𝐒 – 𝐌𝐄𝐍𝐔 𝐀𝐃𝐌𝐈𝐍 ⚙️
+    const args = message.text.split(' ')[1] || '1';
 
+    const sezioni = {
+        1: `
+🛡️ 𝐍𝚵𝑿𝐒𝐔𝐒 – 𝐌𝐄𝐍𝐔 𝐀𝐃𝐌𝐈𝐍 ⚙️
 ════════════════════
+
 👑 𝐆𝐄𝐒𝐓𝐈𝐎𝐍𝐄 𝐑𝐔𝐎𝐋𝐈
-➤ ${usedPrefix}admins  🛡️ Lista admin
+➤ ${usedPrefix}admins 🛡️ Lista admin
 
 ⚠️ 𝐖𝐀𝐑𝐍 & 𝐃𝐈𝐒𝐂𝐈𝐏𝐋𝐈𝐍𝐀
 ➤ ${usedPrefix}warn ⚠️ Avvisa utente
 ➤ ${usedPrefix}listwarn 📄 Lista avvisi
 ➤ ${usedPrefix}unwarn ✅ Rimuovi avviso
+`.trim(),
+
+        2: `
+🛡️ 𝐍𝚵𝑿𝐒𝐔𝐒 – 𝐌𝐄𝐍𝐔 𝐀𝐃𝐌𝐈𝐍 ⚙️
+════════════════════
+
+⚠️ 𝐖𝐀𝐑𝐍 & 𝐃𝐈𝐒𝐂𝐈𝐏𝐋𝐈𝐍𝐀
 ➤ ${usedPrefix}delwarn ❌ Cancella avviso
 ➤ ${usedPrefix}resetwarn 🔄 Reset avvisi
 
@@ -19,28 +29,62 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}smuta 🔊 Smuta la persona
 ➤ ${usedPrefix}tag 🏹 Tagga utenti
 ➤ ${usedPrefix}setname 🚨 Cambia nome al Gruppo
+`.trim(),
+
+        3: `
+🛡️ 𝐍𝚵𝑿𝐒𝐔𝐒 – 𝐌𝐄𝐍𝐔 𝐀𝐃𝐌𝐈𝐍 ⚙️
+════════════════════
 
 🔒 𝐈𝐌𝐏𝐎𝐒𝐓𝐀𝐙𝐈𝐎𝐍𝐈 𝐆𝐑𝐔𝐏𝐏𝐎
-➤ ${usedPrefix}aperto  🌙 Apri gruppo
-➤ ${usedPrefix}chiuso  🔐 Chiudi gruppo
-➤ ${usedPrefix}modlist  📳 lista moderatori 
+➤ ${usedPrefix}aperto 🌙 Apri gruppo
+➤ ${usedPrefix}chiuso 🔐 Chiudi gruppo
+➤ ${usedPrefix}modlist 📳 Lista moderatori
 
 👋 𝐔𝐓𝐄𝐍𝐓𝐈
-➤ ${usedPrefix}kick   ⚔️ Espelle utente
+➤ ${usedPrefix}kick ⚔️ Espelle utente
 
 🔗 𝐋𝐈𝐍𝐊
-➤ ${usedPrefix}link   🔗 Link gruppo
+➤ ${usedPrefix}link 🔗 Link gruppo
 ➤ ${usedPrefix}prendilink 🚨 Prende link dal qr
 
 ════════════════════
 🔖 Versione: *1.0*
-`.trim();
+`.trim()
+    };
 
-    await conn.sendMessage(message.chat, { text: menuText });
+    const sezioneAttuale = parseInt(args);
+    const testo = sezioni[sezioneAttuale];
+
+    if (!testo) return;
+
+    let buttons = [];
+
+    if (sezioneAttuale < 3) {
+        buttons.push({
+            buttonId: `${usedPrefix}admin ${sezioneAttuale + 1}`,
+            buttonText: { displayText: "➡️ Prossima Sezione" },
+            type: 1
+        });
+    }
+
+    if (sezioneAttuale > 1) {
+        buttons.push({
+            buttonId: `${usedPrefix}admin ${sezioneAttuale - 1}`,
+            buttonText: { displayText: "⬅️ Sezione Precedente" },
+            type: 1
+        });
+    }
+
+    await conn.sendMessage(message.chat, {
+        text: testo,
+        footer: "MENU ADMIN",
+        buttons: buttons,
+        headerType: 1
+    });
 };
 
-handler.help = ['menuadmin'];
+handler.help = ['admin'];
 handler.tags = ['menu'];
-handler.command = /^(admin)$/i;
+handler.command = /^(admin)(\s\d+)?$/i;
 
 export default handler;
