@@ -1,14 +1,19 @@
-const { createCanvas } = require('canvas')
+import { createCanvas } from 'canvas'
 
 const handler = async (m, { conn, args, usedPrefix }) => {
 
   if (!args[0]) {
-    return conn.reply(m.chat, `❌ Usa il comando così:\n${usedPrefix}onlyfans nomeprofilo`, m)
+    return conn.reply(
+      m.chat,
+      `❌ Usa il comando così:\n${usedPrefix}onlyfans nomeprofilo`,
+      m
+    )
   }
 
   const nome = args.join(" ")
 
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
+  const random = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1)) + min
 
   const id = random(100000, 999999)
   const prezzo = random(5, 50)
@@ -27,7 +32,7 @@ const handler = async (m, { conn, args, usedPrefix }) => {
 
   const bio = bioList[Math.floor(Math.random() * bioList.length)]
 
-  // CREA CANVAS
+  // CANVAS
   const canvas = createCanvas(800, 1000)
   const ctx = canvas.getContext('2d')
 
@@ -43,15 +48,15 @@ const handler = async (m, { conn, args, usedPrefix }) => {
   ctx.font = 'bold 40px Sans'
   ctx.fillText('ONLYFANS', 280, 75)
 
-  // Avatar circle
+  // Avatar
   ctx.beginPath()
   ctx.arc(400, 250, 120, 0, Math.PI * 2)
   ctx.fillStyle = '#1c1c25'
   ctx.fill()
 
   ctx.fillStyle = '#ffffff'
-  ctx.font = 'bold 30px Sans'
   ctx.textAlign = 'center'
+  ctx.font = 'bold 30px Sans'
   ctx.fillText(nome, 400, 430)
 
   ctx.font = '24px Sans'
@@ -85,4 +90,4 @@ handler.help = ['onlyfans <nome>']
 handler.tags = ['fun']
 handler.command = /^onlyfans$/i
 
-module.exports = handler
+export default handler
