@@ -37,7 +37,7 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
       'antilink, antigore, antiporno, modoadmin',
       'benvenuto, addio, antiprivato, antibot',
       'antispam, antinuke, antiinsta, antitelegram',
-      'antitiktok, antitag, antitrava'
+      'antitiktok, antitag, antitrava, bestemmiometro'
     ])
   }
 
@@ -81,6 +81,26 @@ ${lines.map(l => `➤ ${l}`).join('\n')}
         'Blocca link Telegram nel Danger'
       ])
       break
+
+case 'bestemmiometro':
+  if (m.isGroup && !(isAdmin || isOwner || isROwner)) 
+    return m.reply(noAdmin)
+
+  if (chat.bestemmiometro === isEnable)
+    return m.reply(box('📿 𝐁𝐄𝐒𝐓𝐄𝐌𝐌𝐈𝐎𝐌𝐄𝐓𝐑𝐎', [
+      'Il sigillo è già ' + (isEnable ? 'attivo' : 'disattivo')
+    ]))
+
+  chat.bestemmiometro = isEnable
+
+  result = box('📿 𝐁𝐄𝐒𝐓𝐄𝐌𝐌𝐈𝐎𝐌𝐄𝐓𝐑𝐎', [
+    `Stato rituale: ${isEnable ? '🟢 𝐀𝐓𝐓𝐈𝐕𝐎' : '🔴 𝐃𝐈𝐒𝐀𝐓𝐓𝐈𝐕𝐎'}`,
+    isEnable
+      ? 'Il contatore sacrilego è stato evocato'
+      : 'Il contatore sacrilego è stato sigillato',
+    'Ogni bestemmia verrà registrata nel grimorio'
+  ])
+  break
 
     case 'antitiktok':
       if (m.isGroup && !(isAdmin || isOwner || isROwner)) return m.reply(noAdmin)
