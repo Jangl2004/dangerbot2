@@ -1,6 +1,26 @@
-# Questo è il file in cui dovrebbero esserci i cookies per bypassare i controlli per i bot
-# Per quanto riguarda il comando plugins/dl-play.js 
-# Se si è da server, vps ecc sono necessari i cookies per far si che il comando funzioni
-# Breve tutorial: nel proprio browser cercare Get cookies.txt LOCALLY e scaricare l'estensione, dopodiche
-# Entra su youtube e clicca sull'estensione, selezionare formato Netscape e dopodichè Copy - infine incolla qui al posto di tutto sto testo
-# By sam aka vare, per info o domande wa.me/393514357738
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.youtube.com	TRUE	/	TRUE	1795953472	__Secure-YENID	11.YTE=ZpK53V4YJYKtNdjuf8kOOmxgHcPOYO6f47BZeSUXdFzdahQ7Mmrq8NuJB3ZJhnxvEE1JH8Nu3VM1lXuQEmEnVwOHInDV0bgrnGkqnrfN385jthdcRkbqNUxzeD1opA3V6JmrwUipM9XU5yN12UHwhGP7MYahWsWJiAIoc_Gp6uNGvhVUUX3gBucqkIx5UNkZSlijxL7tSW9jFBP3UWuaNyTmHsYAlcheLJV2LUdyO0LwAP65BpU6tLHbBTtYa_W5BzLsmiFFEzyUS4AuVosNOfbrp822qHGqY4rku3dmFZlCp4KyHwBRNsj8PsMopYv6yq71M6L0RhXxHcYa7COQnA
+.youtube.com	TRUE	/	TRUE	1806658251	PREF	tz=Europe.Rome&f7=100
+.youtube.com	TRUE	/	TRUE	1802520934	SOCS	CAISNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpc2VydmVyXzIwMjYwMTEzLjAzX3AwGgJpdCADGgYIgLmbywY
+.youtube.com	TRUE	/	FALSE	1806657515	HSID	Ap27Bw8cXvPMRDYuG
+.youtube.com	TRUE	/	TRUE	1806657515	SSID	A7Qjm-rK5HNuyvuKT
+.youtube.com	TRUE	/	FALSE	1806657515	APISID	WpxxQi4PR3qYO7cN/AD1wuoFCLeD_CZoRC
+.youtube.com	TRUE	/	TRUE	1806657515	SAPISID	-utRAOyatGGZK5j8/AeCYRXxrGlk-FhxJZ
+.youtube.com	TRUE	/	TRUE	1806657515	__Secure-1PAPISID	-utRAOyatGGZK5j8/AeCYRXxrGlk-FhxJZ
+.youtube.com	TRUE	/	TRUE	1806657515	__Secure-3PAPISID	-utRAOyatGGZK5j8/AeCYRXxrGlk-FhxJZ
+.youtube.com	TRUE	/	FALSE	1806657515	SID	g.a0007AigDOZETdLWADq1kDdKKjl3s3d0tfopMIm3FBlNLdEHaJmQAIH4wdcb_JB6HNNbG-iMsgACgYKAWISAQASFQHGX2Mi4R15er5cKC79Lz4dciNofhoVAUF8yKqvdtZaR1Yrb81DEP3sbUQ10076
+.youtube.com	TRUE	/	TRUE	1806657515	__Secure-1PSID	g.a0007AigDOZETdLWADq1kDdKKjl3s3d0tfopMIm3FBlNLdEHaJmQL_HCzSLQ3-_mk1QXBRZncgACgYKAX8SAQASFQHGX2MijbThtTVmF_uyzvsfzcM0ABoVAUF8yKprJcA50STKgaj_sRZaBdI60076
+.youtube.com	TRUE	/	TRUE	1806657515	__Secure-3PSID	g.a0007AigDOZETdLWADq1kDdKKjl3s3d0tfopMIm3FBlNLdEHaJmQv9wfcnGOsLukpvRCYMmMZgACgYKAfASAQASFQHGX2MiZGo5ZgBdfd0-FGc8L-tisRoVAUF8yKondyswfzgN6j6bwq30_A360076
+.youtube.com	TRUE	/	TRUE	1803633515	__Secure-1PSIDTS	sidts-CjQBBj1CYrZK4BWgLFmtbg4Qc1jaYJzc_ijraSeJ-HsESHQ51h0GcWyWUa3VgU7GlqvcY6WIEAA
+.youtube.com	TRUE	/	TRUE	1803633515	__Secure-3PSIDTS	sidts-CjQBBj1CYrZK4BWgLFmtbg4Qc1jaYJzc_ijraSeJ-HsESHQ51h0GcWyWUa3VgU7GlqvcY6WIEAA
+.youtube.com	TRUE	/	TRUE	1806658043	LOGIN_INFO	AFmmF2swRgIhAPC91FuYrrTR6A_paf0KO7LwYkZBtm3H8-VE8UYiLYVMAiEA6GJgPsmTdj8jiNLlSnl0erRa5OTvm8aZZAyXYr-FL50:QUQ3MjNmeFRKbHVSZy11YWlLeHQzZl9HZXZMak91QjRoNmVDQ2JteG5aUUJBTkpwRUg0OFNDbmZJNWdaQkZNb2UwcG1fN3V0TGthdHhWaS14Q0szY1p0S253WEhfaHhwanY1ZEJQdE9TNDRwZEZoNUZDUmJYdVdvZU5WMjVPdC1UWm9KUjVxNko2bnhrZUcxWjE4cWpWSHdXeFhpN0pSY2dR
+.youtube.com	TRUE	/	FALSE	1803634281	SIDCC	AKEyXzVLaL1lFU2-gJSKgA56UipXYfMWZqRHVizMQ5294MfRvFi7Fg0rCZK_YzPP8fQO7y5X
+.youtube.com	TRUE	/	TRUE	1803634281	__Secure-1PSIDCC	AKEyXzXUkGR_h1RBQAmoQ_K6a7N3R8T_aDCDFJO-RMz2L6CpatUsXW3n5ErPX17Zama4dHUF
+.youtube.com	TRUE	/	TRUE	1803634281	__Secure-3PSIDCC	AKEyXzWNCjbNfaamDK19QQpkX8teXb7suun1mHF-928RizA7I3rEyOpyv8VDYpMl5ELzgIFy
+.youtube.com	TRUE	/	TRUE	1787650248	VISITOR_INFO1_LIVE	CgMQ-mRjfos
+.youtube.com	TRUE	/	TRUE	1787650248	VISITOR_PRIVACY_METADATA	CgJJVBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiBQ
+.youtube.com	TRUE	/	TRUE	0	YSC	cEe0B069G-o
+.youtube.com	TRUE	/	TRUE	1787650232	__Secure-ROLLOUT_TOKEN	CLaqjaqQvsHC1wEQ35Lq4eGjkQMY56CNmOz2kgM%3D
