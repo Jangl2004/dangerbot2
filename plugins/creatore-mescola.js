@@ -3,14 +3,15 @@ var handler = async (m, { conn, participants, command }) => {
   global.db.data.groups = global.db.data.groups || {}
   let groupData = global.db.data.groups[m.chat] || (global.db.data.groups[m.chat] = {})
 
+  // 🔥 JID BOT CORRETTO
+  const botJid = conn.user.id.split(':')[0] + '@s.whatsapp.net'
+
   if (command === 'mescoladmin') {
 
     if (groupData.active)
       return conn.reply(m.chat, '⚠️ Mescolamento già attivo.', m)
 
-    let botJid = conn.user.jid
-
-    // Admin attuali (tranne bot)
+    // 🔹 Admin attuali (ESCLUDE BOT)
     let oldAdmins = participants
       .filter(p => p.admin && p.id !== botJid)
       .map(p => p.id)
@@ -18,8 +19,9 @@ var handler = async (m, { conn, participants, command }) => {
     if (!oldAdmins.length)
       return conn.reply(m.chat, '⚠️ Nessun admin da mescolare.', m)
 
+    // 🔹 Membri normali (ESCLUDE BOT)
     let members = participants
-      .filter(p => !p.admin)
+      .filter(p => !p.admin && p.id !== botJid)
       .map(p => p.id)
 
     if (members.length < 3)
@@ -34,15 +36,17 @@ var handler = async (m, { conn, participants, command }) => {
 
     try {
 
-      // 🔻 Demote uno per volta
+      // 🔻 Demote vecchi admin (mai il bot)
       for (let user of oldAdmins) {
+        if (user === botJid) continue
         try {
           await conn.groupParticipantsUpdate(m.chat, [user], 'demote')
         } catch {}
       }
 
-      // 🔺 Promote uno per volta
+      // 🔺 Promote nuovi admin
       for (let user of newAdmins) {
+        if (user === botJid) continue
         try {
           await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
         } catch {}
@@ -50,19 +54,17 @@ var handler = async (m, { conn, participants, command }) => {
 
       let tagList = newAdmins.map(u => '@' + u.split('@')[0]).join(' ')
 
-      let msg = `
-🎲 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓
+      conn.reply(m.chat,
+`🎲 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓
 👑 ADMIN MESCOLATI
 
 Nuovi admin:
 ${tagList}
 
-⏳ Fino a ripristino manuale.
-`.trim()
-
-      conn.reply(m.chat, msg, m, {
-        mentions: newAdmins
-      })
+⏳ Fino a ripristino manuale.`,
+        m,
+        { mentions: newAdmins }
+      )
 
     } catch (e) {
       conn.reply(m.chat, '❌ Errore durante il mescolamento.', m)
@@ -76,15 +78,15 @@ ${tagList}
 
     try {
 
-      // 🔻 Rimuove temporanei uno per volta
       for (let user of groupData.tempAdmins || []) {
+        if (user === botJid) continue
         try {
           await conn.groupParticipantsUpdate(m.chat, [user], 'demote')
         } catch {}
       }
 
-      // 🔺 Ripristina originali uno per volta
       for (let user of groupData.oldAdmins || []) {
+        if (user === botJid) continue
         try {
           await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
         } catch {}
