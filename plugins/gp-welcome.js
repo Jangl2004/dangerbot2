@@ -95,7 +95,7 @@ const WelcomeCard = ({ pfpUrl, isGoodbye }) => {
       React.createElement('div', { className: 'card' },
         React.createElement('img', { src: pfpUrl, className: 'pfp' }),
         React.createElement('div', { className: 'title' },
-          isGoodbye ? 'ADDIO' : 'BENVENUTO'
+          isGoodbye ? '𐍉' : '𐍉'
         )
       )
     )
