@@ -1,15 +1,15 @@
 import fetch from 'node-fetch'
 import { createCanvas, loadImage } from 'canvas'
 
-// 🧠 Immagini brainrot dirette (solo .jpg o .png pubbliche)
+// 🧠 Immagini brainrot dirette
 const brainrotImages = [
-  "https://i.imgur.com/v6kz7mb.jpg",
-  "https://i.imgur.com/3693Qnq.jpg",
-  "https://i.imgur.com/okhc0vA.jpg",
-  "https://i.imgur.com/6vmd1jh.jpg"
+  "https://i.imgur.com/sV1FAsS.png",
+  "https://i.imgur.com/GfwsDr7.png",
+  "https://i.imgur.com/svhOrGS.png",
+  "https://i.imgur.com/qO5rVdj.png"
 ]
 
-// [x, y, width, height] della faccia in ciascuna immagine
+// [x, y, width, height] della faccia in ciascuna immagine (modifica se necessario)
 const faceCoords = [
   [150, 120, 180, 180],
   [120, 100, 200, 200],
@@ -53,13 +53,13 @@ async function brainrotFace(userBuffer) {
   // Sovrapponi faccia dell'utente
   ctx.drawImage(userImg, coords[0], coords[1], coords[2], coords[3])
 
-  // Overlay deepfried
-  ctx.globalCompositeOperation = "overlay"
+  // Overlay "deepfried"
+  ctx.globalAlpha = 0.25
   ctx.fillStyle = "rgba(255,0,0,0.25)"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = "rgba(255,255,0,0.2)"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.globalCompositeOperation = "source-over"
+  ctx.globalAlpha = 1.0
 
   // Testo brainrot casuale
   const frase = brainrotFrasi[Math.floor(Math.random() * brainrotFrasi.length)]
@@ -111,7 +111,7 @@ let handler = async (m, { conn }) => {
     if (!contentType.startsWith('image/')) throw new Error("Non è un'immagine valida")
     userBuffer = Buffer.from(await res.arrayBuffer())
   } catch {
-    // Fallback con immagine pubblica diretta (PNG/JPG)
+    // Fallback con immagine pubblica diretta
     const fallbackUrl = "https://i.imgur.com/0Qw7Y0H.png"
     const res = await fetch(fallbackUrl)
     userBuffer = Buffer.from(await res.arrayBuffer())
@@ -131,7 +131,7 @@ let handler = async (m, { conn }) => {
     )
   } catch (e) {
     console.error(e)
-    m.reply("Errore nella generazione brainrot.")
+    m.reply("❌ Errore nella generazione brainrot.")
   }
 }
 
