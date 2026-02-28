@@ -42,16 +42,11 @@ export async function before(m, { conn, groupMetadata }) {
     ======================= */
     const caption = isGoodbye
         ? `
-「  *BYE BYE*  」
-👤 *Utente:* @${cleanUserId}
-👋🏻 *Ha lasciato il gruppo:" ${groupName}
-👥 *Membri attuali:* ${memberCount}
+𝐌𝐢 𝐬𝐚 𝐜𝐡𝐞 @${cleanUserId} 𝐡𝐚 𝐪𝐮𝐢𝐭𝐭𝐚𝐭𝐨
+
 `
         : `
-「  *BENVENUTO*  」
-👤 *Utente:* @${cleanUserId}
-🎉 *Gruppo:* ${groupName}
-👥 *Membri:* ${memberCount}
+@${cleanUserId} 𝐁𝐞𝐧𝐯𝐞𝐧𝐮𝐭𝐨 𝐬𝐮 ${groupName}
 `
 
     /* =======================
