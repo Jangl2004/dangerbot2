@@ -1,57 +1,32 @@
 import yts from 'yt-search'
-import ytdl from 'ytdl-core'
 
-let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) return m.reply(`🎵 Usa così:\n${usedPrefix + command} nome canzone`)
-
-  await m.reply('🔎 Sto cercando la canzone...')
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) return m.reply(`🔎 Usa: *${usedPrefix + command} titolo o artista*`)
 
   try {
-    const search = await yts(text)
-    const video = search.videos[0]
+    const r = await yts(text)
+    const vids = (r.videos || []).slice(0, 5)
+    if (!vids.length) return m.reply('❌ Nessun risultato trovato.')
 
-    if (!video) return m.reply('❌ Nessun risultato trovato.')
+    let msg = `🎵 *Risultati per:* ${text}\n\n`
+    vids.forEach((v, i) => {
+      msg += `*${i + 1}.* ${v.title}\n`
+      msg += `⏱ ${v.timestamp} | 👁 ${v.views}\n`
+      msg += `🔗 ${v.url}\n\n`
+    })
 
-    const url = video.url
+    msg += `✅ Copia un link e aprilo.\n`
+    msg += `Se vuoi, posso farti anche: *${usedPrefix}play 1* per scegliere il primo risultato automaticamente (solo link).`
 
-    // Se comando è playvid manda video, altrimenti audio
-    if (/playvid/i.test(command)) {
-
-      const stream = ytdl(url, { filter: 'audioandvideo' })
-
-      await conn.sendMessage(m.chat, {
-        video: stream,
-        mimetype: 'video/mp4',
-        caption:
-`🎬 *${video.title}*
-
-⏱ Durata: ${video.timestamp}
-👁 Visualizzazioni: ${video.views}
-🔗 ${video.url}`
-      }, { quoted: m })
-
-    } else {
-
-      const stream = ytdl(url, {
-        filter: 'audioonly',
-        quality: 'highestaudio'
-      })
-
-      await conn.sendMessage(m.chat, {
-        audio: stream,
-        mimetype: 'audio/mpeg',
-        fileName: `${video.title}.mp3`
-      }, { quoted: m })
-    }
-
+    await conn.sendMessage(m.chat, { text: msg }, { quoted: m })
   } catch (e) {
-    console.error(e)
-    m.reply('❌ Errore nel download. Forse YouTube sta bloccando.')
+    console.error('PLAY search error:', e)
+    m.reply('❌ Errore nella ricerca. Controlla la console per i dettagli.')
   }
 }
 
-handler.help = ['play', 'playvid']
-handler.tags = ['downloader']
-handler.command = /^(play|playvid)$/i
+handler.help = ['play <titolo/artista>']
+handler.tags = ['search']
+handler.command = /^play$/i
 
 export default handler
