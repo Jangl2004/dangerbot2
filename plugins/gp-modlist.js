@@ -13,7 +13,7 @@ const handler = async (m, { conn, text }) => {
     .map(([jid]) => jid);
 
   if (mods.length === 0)
-    return m.reply('⚠️ 𝐍𝚵𝑿𝐒𝐔𝐒 𝚩𝚯𝐓 ❌ Nessun MOD attivo in questo gruppo.');
+    return m.reply('⚠️ DANGER BOT ❌ Nessun MOD attivo in questo gruppo.');
 
   const customMsg = text
     ? `╔═════[ 𝕄𝔼𝕊𝕊𝔸𝔾𝔾𝕀𝕆 ]══╗
