@@ -24,7 +24,7 @@ let handler = async (m, { conn, usedPrefix }) => {
       year: 'numeric',
     })
 
-    const botName = global.db?.data?.nomedelbot || "ᴅᴛʜ-ʙᴏᴛ"
+    const botName = global.db?.data?.nomedelbot || "DANGER BOT"
 
     const textMsg = `
 ⟦ 𝐒𝐓𝐀𝐓𝐎 𝐁𝐎𝐓 ⟧
