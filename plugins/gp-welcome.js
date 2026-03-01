@@ -65,7 +65,7 @@ Benvenuto in *${groupName}*
 
 👥 Membri attuali: ${memberCount}
 
-Leggi le regole in descrizione per evitare di essere kickato. Buona permanenza
+Leggi le regole in descrizione.Detto ciò buona permanenza
 `.trim()
 
         await conn.sendMessage(m.chat, { text, mentions: [user] })
