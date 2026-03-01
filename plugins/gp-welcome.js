@@ -26,15 +26,13 @@ handler.before = async function (m, { conn, groupMetadata }) {
 
   if (isRemove && chat.goodbye) {
     text = `
-@${cleanUserId}
-𝐌𝐢 𝐬𝐚 𝐜𝐡𝐞 𝐡𝐚 𝐪𝐮𝐢𝐭𝐭𝐚𝐭𝐨…
+@${cleanUserId} 𝐌𝐢 𝐬𝐚 𝐜𝐡𝐞 𝐡𝐚 𝐪𝐮𝐢𝐭𝐭𝐚𝐭𝐨…
 `
   }
 
   if (isAdd && chat.welcome) {
     text = `
-@${cleanUserId}
-𝐁𝐞𝐧𝐯𝐞𝐧𝐮𝐭𝐨 𝐬𝐮 ${groupName}
+@${cleanUserId} 𝐁𝐞𝐧𝐯𝐞𝐧𝐮𝐭𝐨 𝐬𝐮 ${groupName}
 `
   }
 
