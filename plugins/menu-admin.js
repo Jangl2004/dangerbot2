@@ -7,8 +7,9 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 🛡️ 𝐍𝚵𝑿𝐒𝐔𝐒 – 𝐌𝐄𝐍𝐔 𝐀𝐃𝐌𝐈𝐍 ⚙️
 ════════════════════
 
-👑 𝐆𝐄𝐒𝐓𝐈𝐎𝐍𝐄 𝐑𝐔𝐎𝐋𝐈
+👑 𝐆𝐄𝐒𝐓𝐈𝐎𝐍𝐄 
 ➤ ${usedPrefix}admins 🛡️ Lista admin
+➤ ${usedPrefix}accetta ✅ Accetta tutte le richieste 
 
 ⚠️ 𝐖𝐀𝐑𝐍 & 𝐃𝐈𝐒𝐂𝐈𝐏𝐋𝐈𝐍𝐀
 ➤ ${usedPrefix}warn ⚠️ Avvisa utente
