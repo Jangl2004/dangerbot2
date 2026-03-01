@@ -5,7 +5,7 @@ var handler = async (m, { conn, isBotAdmin, isAdmin }) => {
   if (!isBotAdmin) return m.reply('⚠️ Il bot deve essere admin.')
 
   try {
-    // 1. DISATTIVA APPROVAZIONE (Entrata libera)
+    // 1. DISATTIVA APPROVAZIONE (Apertura)
     await conn.query({
       tag: 'iq',
       attrs: {
@@ -18,17 +18,18 @@ var handler = async (m, { conn, isBotAdmin, isAdmin }) => {
         attrs: {},
         content: [{
           tag: 'group_join',
-          attrs: { state: 'off' } // <--- OFF
+          attrs: { state: 'off' } 
         }]
       }]
     })
     
+    // Unico messaggio di avviso
     await conn.sendMessage(m.chat, { text: '🔓 *ACCESSO LIBERO* (2s)' }, { quoted: m })
 
     // 2. ATTENDE 2 SECONDI
     await delay(2000)
 
-    // 3. RIATTIVA APPROVAZIONE (Protetta)
+    // 3. RIATTIVA APPROVAZIONE (Chiusura silenziosa)
     await conn.query({
       tag: 'iq',
       attrs: {
@@ -41,16 +42,16 @@ var handler = async (m, { conn, isBotAdmin, isAdmin }) => {
         attrs: {},
         content: [{
           tag: 'group_join',
-          attrs: { state: 'on' } // <--- ON
+          attrs: { state: 'on' } 
         }]
       }]
     })
     
-    await conn.sendMessage(m.chat, { text: '🔒 *ACCESSO CHIUSO*' }, { quoted: m })
+    // Nessun messaggio qui, il bot ha finito.
 
   } catch (e) {
     console.error("ERRORE_QUERY_DIRETTA:", e)
-    m.reply('❌ Impossibile cambiare impostazione. Assicurati che il gruppo abbia la funzione "Approva partecipanti" nelle impostazioni originali.')
+    m.reply('❌ Errore critico: il gruppo non supporta l\'approvazione.')
   }
 }
 
