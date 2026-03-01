@@ -1,37 +1,35 @@
-var handler = async (m, { conn, participants, command }) => {
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+var handler = async (m, { conn, participants, command, isOwner }) => {
 
   global.db.data.groups = global.db.data.groups || {}
   let groupData = global.db.data.groups[m.chat] || (global.db.data.groups[m.chat] = {})
 
-  // 1. Identifica chiaramente il BOT e gli OWNER
-  const botJid = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-  const owners = global.owner.map(v => v[0] + '@s.whatsapp.net') // Prende la lista owner dalla config
+  // 🛡️ PROTEZIONE TOTALE: Identifica il bot in modo ultra-preciso
+  const botJid = conn.user.id.includes(':') ? conn.user.id.split(':')[0] + '@s.whatsapp.net' : conn.user.id
   
-  // Lista nera (chi NON deve MAI essere toccato dal demote)
+  // Lista dei proprietari (Owner) dal file di configurazione
+  const owners = global.owner ? global.owner.map(v => v[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net') : []
+  
+  // Chi NON deve mai essere toccato
   const whitelist = [botJid, ...owners]
 
   if (command === 'mescoladmin') {
+    if (groupData.active) return conn.reply(m.chat, '⚠️ Mescolamento già attivo.', m)
 
-    if (groupData.active)
-      return conn.reply(m.chat, '⚠️ Mescolamento già attivo. Usa .ripristinaadmin prima.', m)
-
-    // 🔹 Admin attuali (ESCLUDE BOT E OWNER)
+    // 🔹 Trova admin attuali (ESCLUDE BOT E OWNER)
     let oldAdmins = participants
-      .filter(p => p.admin && !whitelist.includes(p.id))
+      .filter(p => p.admin && !whitelist.some(w => w === p.id))
       .map(p => p.id)
 
-    if (oldAdmins.length === 0)
-      return conn.reply(m.chat, '⚠️ Nessun admin (oltre a bot/owner) da mescolare.', m)
-
-    // 🔹 Membri normali (ESCLUDE BOT E OWNER)
+    // 🔹 Trova membri normali (ESCLUDE BOT E OWNER)
     let members = participants
-      .filter(p => !p.admin && !whitelist.includes(p.id))
+      .filter(p => !p.admin && !whitelist.some(w => w === p.id))
       .map(p => p.id)
 
-    if (members.length < 3)
-      return conn.reply(m.chat, '⚠️ Servono almeno 3 membri comuni per il mescolamento.', m)
+    if (members.length < 3) return conn.reply(m.chat, '⚠️ Servono almeno 3 membri (non admin/owner) per procedere.', m)
 
-    // Mescola e seleziona i primi 3
+    // Sceglie 3 nuovi admin a caso
     let shuffled = members.sort(() => 0.5 - Math.random())
     let newAdmins = shuffled.slice(0, 3)
 
@@ -40,67 +38,58 @@ var handler = async (m, { conn, participants, command }) => {
     groupData.active = true
 
     try {
-      // 🔻 Demote vecchi admin (solo quelli non in whitelist)
+      // 1. Toglie admin ai vecchi (solo se non sono in whitelist)
       for (let user of oldAdmins) {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'demote').catch(e => console.log(`Errore demote: ${user}`))
+        await conn.groupParticipantsUpdate(m.chat, [user], 'demote')
+        await delay(500) // Pausa tecnica per evitare blocchi
       }
 
-      // 🔺 Promote nuovi admin
+      // 2. Mette admin i nuovi scelti
       for (let user of newAdmins) {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'promote').catch(e => console.log(`Errore promote: ${user}`))
+        await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
+        await delay(500)
       }
 
-      let tagList = newAdmins.map(u => '@' + u.split('@')[0]).join('\n')
-
-      conn.reply(m.chat,
-`🎲 *NEXUS BOT: SHUFFLE* 👑
-
-*Nuovi Admin Temporanei:*
-${tagList}
-
-⏳ _Gli admin originali sono stati salvati._`,
-        m,
-        { mentions: newAdmins }
-      )
+      let tagList = newAdmins.map(u => '@' + u.split('@')[0]).join(' ')
+      conn.reply(m.chat, `🎲 *ADMIN MESCOLATI*\n\nNuovi admin:\n${tagList}\n\nIl Bot e i Proprietari sono rimasti admin.`, m, { mentions: newAdmins })
 
     } catch (e) {
       console.error(e)
-      conn.reply(m.chat, '❌ Errore critico durante il processo.', m)
+      conn.reply(m.chat, '❌ Errore durante l\'aggiornamento dei ruoli.', m)
     }
   }
 
   if (command === 'ripristinaadmin') {
-
-    if (!groupData.active)
-      return conn.reply(m.chat, '⚠️ Non c\'è un mescolamento attivo da ripristinare.', m)
+    if (!groupData.active) return conn.reply(m.chat, '⚠️ Nessun mescolamento attivo.', m)
 
     try {
-      // Toglie i permessi ai temporanei
+      // Toglie i temporanei
       for (let user of groupData.tempAdmins || []) {
-        if (whitelist.includes(user)) continue
-        await conn.groupParticipantsUpdate(m.chat, [user], 'demote').catch(e => {})
+        if (!whitelist.some(w => w === user)) {
+          await conn.groupParticipantsUpdate(m.chat, [user], 'demote')
+          await delay(500)
+        }
       }
 
-      // Ridà i permessi agli originali
+      // Rimette i vecchi
       for (let user of groupData.oldAdmins || []) {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'promote').catch(e => {})
+        await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
+        await delay(500)
       }
 
       delete groupData.oldAdmins
       delete groupData.tempAdmins
       delete groupData.active
-
-      conn.reply(m.chat, '✅ Struttura admin originale ripristinata con successo.', m)
-
+      conn.reply(m.chat, '✅ Admin originali ripristinati.', m)
     } catch (e) {
-      conn.reply(m.chat, '❌ Errore durante il ripristino.', m)
+      conn.reply(m.chat, '❌ Errore nel ripristino.', m)
     }
   }
 }
 
 handler.command = ['mescoladmin', 'ripristinaadmin']
 handler.group = true
-handler.owner = true
+handler.owner = true // Solo l'owner può lanciare il comando
 handler.botAdmin = true
 
 export default handler
