@@ -18,7 +18,6 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}masturbometro 🍷
 ➤ ${usedPrefix}fortunometro 🍀
 ➤ ${usedPrefix}intelligiometro 🧠
-➤ ${usedPrefix}presentazione🤖
 
 ════════════════════
 🎯 𝐀𝐙𝐙𝐀𝐑𝐃𝐎 & 𝐂𝐀𝐎𝐒
