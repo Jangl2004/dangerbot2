@@ -3,41 +3,53 @@ let handler = async () => {}
 
 handler.before = async function (m, { conn }) {
   try {
-    if (!m.message) return
-    if (m.isBaileys) return
+    if (!m) return
     if (!m.isGroup) return
 
-    const botJid = conn.user?.jid
-    if (!botJid) return
+    const botJidRaw = conn.user?.jid
+    if (!botJidRaw) return
 
-    // ✅ 1) AUTO-PRESENTAZIONE quando il bot viene aggiunto
-    // messageStubType / messageStubParameters vengono usati in molte basi
+    // ✅ normalizza jid (alcune basi hanno decodeJid)
+    const decode = conn.decodeJid ? conn.decodeJid.bind(conn) : (j) => j
+    const botJid = decode(botJidRaw)
+
+    // =========================
+    // 1) AUTO-PRESENTAZIONE: messaggi di sistema (stub)
+    // =========================
     const stubType = m.messageStubType
     const stubParams = m.messageStubParameters || []
 
-    // 27/28/29 variano a seconda della base/wa version: add/invite ecc.
-    const isAddStub = [27, 28, 29].includes(stubType)
+    // 🔎 DEBUG (lascia 1 minuto per vedere cosa arriva quando aggiungi qualcuno)
+    // console.log("STUB DEBUG:", stubType, stubParams)
 
-    if (isAddStub) {
-      // stubParams di solito contiene i JID aggiunti
-      const addedJids = stubParams
-      const botAdded = addedJids.includes(botJid)
+    // Tipi comuni: add/invite/join-by-link (variano)
+    const isJoinStub = typeof stubType === "number" && stubParams.length > 0
 
-      if (botAdded) {
+    if (isJoinStub) {
+      // stubParams spesso contiene i jid coinvolti
+      const normalizedParams = stubParams.map(decode)
+
+      if (normalizedParams.includes(botJid)) {
         const prefix = "."
         await sendIntro(conn, m.chat, prefix, null)
         return
       }
     }
 
-    // ✅ 2) PRESENTAZIONE su menzione + keyword (il tuo codice)
+    // ✅ ORA puoi filtrare Baileys senza rompere gli stub
+    if (!m.message) return
+    if (m.isBaileys) return
     if (m.fromMe) return
 
+    // =========================
+    // 2) PRESENTAZIONE su menzione + keyword (come avevi tu)
+    // =========================
     const textRaw = (m.text || "").trim()
     if (!textRaw) return
 
     const prefix = getPrefix(textRaw) || "."
-    const mentioned = getMentionedJids(m)
+    const mentioned = getMentionedJids(m).map(decode)
+
     if (!mentioned.includes(botJid)) return
 
     const text = textRaw.toLowerCase()
