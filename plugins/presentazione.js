@@ -8,48 +8,43 @@ handler.before = async function (m, { conn }) {
 
     const botJidRaw = conn.user?.jid
     if (!botJidRaw) return
-
-    // ✅ normalizza jid (alcune basi hanno decodeJid)
     const decode = conn.decodeJid ? conn.decodeJid.bind(conn) : (j) => j
-    const botJid = decode(botJidRaw)
+
+    const chatId = m.chat
+    const prefixDefault = "."
 
     // =========================
-    // 1) AUTO-PRESENTAZIONE: messaggi di sistema (stub)
+    // 0) AUTO-INTRO al primo messaggio visto nel gruppo (non serve admin)
     // =========================
-    const stubType = m.messageStubType
-    const stubParams = m.messageStubParameters || []
+    // usa un flag per gruppo: se non esiste, lo creiamo
+    global.db = global.db || {}
+    global.db.data = global.db.data || {}
+    global.db.data.groupIntro = global.db.data.groupIntro || {}
 
-    // 🔎 DEBUG (lascia 1 minuto per vedere cosa arriva quando aggiungi qualcuno)
-    // console.log("STUB DEBUG:", stubType, stubParams)
-
-    // Tipi comuni: add/invite/join-by-link (variano)
-    const isJoinStub = typeof stubType === "number" && stubParams.length > 0
-
-    if (isJoinStub) {
-      // stubParams spesso contiene i jid coinvolti
-      const normalizedParams = stubParams.map(decode)
-
-      if (normalizedParams.includes(botJid)) {
-        const prefix = "."
-        await sendIntro(conn, m.chat, prefix, null)
+    // se non ho ancora fatto la presentazione in questo gruppo
+    if (!global.db.data.groupIntro[chatId]) {
+      // aspetta un messaggio "normale" (non di sistema), per evitare falsi trigger
+      if (m.message && !m.isBaileys && !m.fromMe) {
+        global.db.data.groupIntro[chatId] = true
+        await sendIntro(conn, chatId, prefixDefault, m)
         return
       }
     }
 
-    // ✅ ORA puoi filtrare Baileys senza rompere gli stub
+    // =========================
+    // 1) Presentazione su menzione + keyword (come già avevi)
+    // =========================
     if (!m.message) return
     if (m.isBaileys) return
     if (m.fromMe) return
 
-    // =========================
-    // 2) PRESENTAZIONE su menzione + keyword (come avevi tu)
-    // =========================
     const textRaw = (m.text || "").trim()
     if (!textRaw) return
 
-    const prefix = getPrefix(textRaw) || "."
-    const mentioned = getMentionedJids(m).map(decode)
+    const prefix = getPrefix(textRaw) || prefixDefault
 
+    const botJid = decode(botJidRaw)
+    const mentioned = getMentionedJids(m).map(decode)
     if (!mentioned.includes(botJid)) return
 
     const text = textRaw.toLowerCase()
@@ -62,7 +57,7 @@ handler.before = async function (m, { conn }) {
 
     if (!wantIntro) return
 
-    await sendIntro(conn, m.chat, prefix, m)
+    await sendIntro(conn, chatId, prefix, m)
 
   } catch (e) {
     console.error("Errore presentazione:", e)
