@@ -37,11 +37,7 @@ handler.before = async function (m, { conn }) {
 
     // ✍️ Modifica qui le funzioni reali del tuo bot
     const features = [
-      `📡 Ping/Stato: *${prefix}ping*`,
-      `📋 Menu: *${prefix}menu*`,
-      `🏆 Top giornaliero: *${prefix}top*`,
-      `👑 Admin: *${prefix}promote* / *${prefix}demote*`,
-      `🛡️ Moderazione: *${prefix}antilink*`
+      `📋 Menu: *${prefix}se vuoi sapere i miei comandi schiaccia Menú e ti fornirò tutti i comandi *`,
     ]
 
     const introText = `
