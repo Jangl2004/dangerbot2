@@ -3,19 +3,22 @@
 const COOLDOWN_MS = 3000
 const MAX_HISTORY = 12
 
-let handler = async (m, { conn, command }) => {
+let handler = async (m, { conn, args }) => {
   if (!m.isGroup) return conn.reply(m.chat, "Funzione solo per gruppi.", m)
 
-  if (!global.db.data.aiLocal) global.db.data.aiLocal = { enabled: {}, history: {}, cooldown: {} }
+  if (!global.db.data.aiLocal) 
+    global.db.data.aiLocal = { enabled: {}, history: {}, cooldown: {} }
 
-  if (command === "1") {
+  if (args[0] !== "ia") return
+
+  if (m.text.startsWith(".1")) {
     global.db.data.aiLocal.enabled[m.chat] = true
-    return conn.reply(m.chat, "🤖 IA locale *attivata* (modalità: intelligente ma sarcastica).", m)
+    return conn.reply(m.chat, "🤖 IA locale attivata.", m)
   }
 
-  if (command === "0") {
+  if (m.text.startsWith(".0")) {
     global.db.data.aiLocal.enabled[m.chat] = false
-    return conn.reply(m.chat, "🛑 IA locale *disattivata*.", m)
+    return conn.reply(m.chat, "🛑 IA locale disattivata.", m)
   }
 }
 
