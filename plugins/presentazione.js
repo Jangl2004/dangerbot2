@@ -1,56 +1,26 @@
-// Plugin fatto da Luxifer 
+// Plugin fatto da Luxifer   
 let handler = async () => {}
 
 handler.before = async function (m, { conn }) {
   try {
-    if (!m) return
-    if (!m.isGroup) return
-
-    const botJidRaw = conn.user?.jid
-    if (!botJidRaw) return
-
-    // ✅ normalizza jid (alcune basi hanno decodeJid)
-    const decode = conn.decodeJid ? conn.decodeJid.bind(conn) : (j) => j
-    const botJid = decode(botJidRaw)
-
-    // =========================
-    // 1) AUTO-PRESENTAZIONE: messaggi di sistema (stub)
-    // =========================
-    const stubType = m.messageStubType
-    const stubParams = m.messageStubParameters || []
-
-    // 🔎 DEBUG (lascia 1 minuto per vedere cosa arriva quando aggiungi qualcuno)
-    // console.log("STUB DEBUG:", stubType, stubParams)
-
-    // Tipi comuni: add/invite/join-by-link (variano)
-    const isJoinStub = typeof stubType === "number" && stubParams.length > 0
-
-    if (isJoinStub) {
-      // stubParams spesso contiene i jid coinvolti
-      const normalizedParams = stubParams.map(decode)
-
-      if (normalizedParams.includes(botJid)) {
-        const prefix = "."
-        await sendIntro(conn, m.chat, prefix, null)
-        return
-      }
-    }
-
-    // ✅ ORA puoi filtrare Baileys senza rompere gli stub
     if (!m.message) return
     if (m.isBaileys) return
     if (m.fromMe) return
+    if (!m.isGroup) return
 
-    // =========================
-    // 2) PRESENTAZIONE su menzione + keyword (come avevi tu)
-    // =========================
+    const botJid = conn.user?.jid
+    if (!botJid) return
+
     const textRaw = (m.text || "").trim()
     if (!textRaw) return
 
+    // ✅ prende il prefisso dal messaggio (di solito ".")
     const prefix = getPrefix(textRaw) || "."
-    const mentioned = getMentionedJids(m).map(decode)
 
-    if (!mentioned.includes(botJid)) return
+    // ✅ menzione robusta
+    const mentioned = getMentionedJids(m)
+    const isMentioned = mentioned.includes(botJid)
+    if (!isMentioned) return
 
     const text = textRaw.toLowerCase()
     const wantIntro =
@@ -62,39 +32,38 @@ handler.before = async function (m, { conn }) {
 
     if (!wantIntro) return
 
-    await sendIntro(conn, m.chat, prefix, m)
+    const botName = global.db?.data?.nomedelbot || "DANGER BOT"
+
+    // ✍️ Modifica qui le funzioni reali del tuo bot
+    const features = [
+      `📋 Menu: *${prefix} *`,
+    ]
+
+    const introText = `
+⟦ 𝐈𝐍𝐅𝐎 𝐁𝐎𝐓 ⟧
+
+👋 Ciao! Sono *${botName}* 🤖
+Sono un bot per gruppi WhatsApp:  offro una maggiore sicurezza al gruppo e a intrattenere la chat
+
+📌  Premi il bottone sotto e ti fornirò tutti i miei comandi. 
+`.trim()
+
+    await conn.sendMessage(m.chat, {
+      text: introText,
+      footer: "PRESENTAZIONE BOT",
+      buttons: [
+        { buttonId: `${prefix}menu`, buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 },
+      ],
+      headerType: 1
+    }, { quoted: m })
 
   } catch (e) {
     console.error("Errore presentazione:", e)
   }
 }
 
-async function sendIntro(conn, chatId, prefix, quotedMsg) {
-  const botName = global.db?.data?.nomedelbot || "DANGER BOT"
-
-  const introText = `
-⟦ 𝐈𝐍𝐅𝐎 𝐁𝐎𝐓 ⟧
-
-👋 Ciao! Sono *${botName}* 🤖
-Sono un bot per gruppi WhatsApp: offro una maggiore sicurezza al gruppo e a intrattenere la chat
-
-📌 Premi il bottone sotto e ti fornirò tutti i miei comandi.
-`.trim()
-
-  const payload = {
-    text: introText,
-    footer: "PRESENTAZIONE BOT",
-    buttons: [
-      { buttonId: `${prefix}menu`, buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 },
-    ],
-    headerType: 1
-  }
-
-  if (quotedMsg) await conn.sendMessage(chatId, payload, { quoted: quotedMsg })
-  else await conn.sendMessage(chatId, payload)
-}
-
 function getPrefix(text) {
+  // prende il primo carattere se è un prefisso classico
   const c = (text || "")[0]
   if ([".", "!", "/", "#"].includes(c)) return c
   return null
