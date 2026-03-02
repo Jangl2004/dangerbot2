@@ -33,9 +33,15 @@ handler.command = ["antimedia"]
 handler.group = true
 handler.admin = true
 handler.tags = ["group"]
-handler.help = ["antimedia 1/0"]
+handler.help = ["1/0 antimedia"]
 
 // ===== BLOCCO MEDIA =====
+
+// ===== BLOCCO MEDIA (avviso 1 volta per utente) =====
+
+// memorizza chi è già stato avvisato (RAM)
+global._antimediaWarnedUsers = global._antimediaWarnedUsers || {} 
+// struttura: { [chatId]: Set(jid) }
 
 handler.before = async function (m, { conn }) {
   if (!m.isGroup || !m.message || m.fromMe) return
@@ -44,7 +50,6 @@ handler.before = async function (m, { conn }) {
   if (!global._antimedia?.[chatId]?.enabled) return
 
   const msg = m.message
-
   const isMedia =
     msg.imageMessage ||
     msg.videoMessage ||
@@ -56,10 +61,26 @@ handler.before = async function (m, { conn }) {
 
   if (!isMedia) return
 
+  // 1) elimina il media (se il bot è admin)
   try {
     await conn.sendMessage(chatId, { delete: m.key })
-    await conn.reply(chatId, "🚫 Media non consentiti in questo gruppo.", m)
+  } catch {}
+
+  // 2) avvisa SOLO una volta per ogni membro
+  const sender = m.sender
+  global._antimediaWarnedUsers[chatId] = global._antimediaWarnedUsers[chatId] || new Set()
+
+  const warnedSet = global._antimediaWarnedUsers[chatId]
+  if (warnedSet.has(sender)) return
+
+  warnedSet.add(sender)
+
+  try {
+    await conn.reply(
+      chatId,
+      `🚫 Qui i *media non sono consentiti* (antimedia attivo).\nDa ora in poi verranno eliminati automaticamente.`,
+      m
+    )
   } catch {}
 }
-
 export default handler
