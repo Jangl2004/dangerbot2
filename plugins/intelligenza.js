@@ -1,28 +1,46 @@
-// AI Locale Potente (senza API) - intelligente ma sarcastica
-// .1 attiva nel gruppo | .0 disattiva nel gruppo
-// Risponde solo se menzionata o se si risponde a un suo messaggio
+import OpenAI from "openai"
+import dotenv from "dotenv"
 
-const COOLDOWN_MS = 3000
-const MAX_HISTORY = 12
+dotenv.config()
 
-let handler = async (m, { conn, args }) => {
-  if (!m.isGroup) return conn.reply(m.chat, "Funzione solo per gruppi.", m)
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+})
 
-  if (!global.db.data.aiLocal) 
-    global.db.data.aiLocal = { enabled: {}, history: {}, cooldown: {} }
+const COOLDOWN = 2500
+const MAX_HISTORY = 10
 
-  if (args[0] !== "ia") return
-
-  if (m.text.startsWith(".1")) {
-    global.db.data.aiLocal.enabled[m.chat] = true
-    return conn.reply(m.chat, "🤖 IA locale attivata.", m)
-  }
-
-  if (m.text.startsWith(".0")) {
-    global.db.data.aiLocal.enabled[m.chat] = false
-    return conn.reply(m.chat, "🛑 IA locale disattivata.", m)
+function ensureStore() {
+  if (!global.db.data.aiReal) {
+    global.db.data.aiReal = {
+      enabled: {},
+      history: {},
+      cooldown: {}
+    }
   }
 }
+
+function pushHistory(chat, role, content) {
+  ensureStore()
+  if (!global.db.data.aiReal.history[chat])
+    global.db.data.aiReal.history[chat] = []
+
+  global.db.data.aiReal.history[chat].push({
+    role,
+    content: String(content).slice(0, 1200)
+  })
+
+  const h = global.db.data.aiReal.history[chat]
+  if (h.length > MAX_HISTORY)
+    h.splice(0, h.length - MAX_HISTORY)
+}
+
+function getHistory(chat) {
+  ensureStore()
+  return global.db.data.aiReal.history[chat] || []
+}
+
+let handler = async () => {}
 
 handler.before = async function (m, { conn }) {
   try {
@@ -31,13 +49,25 @@ handler.before = async function (m, { conn }) {
     if (m.fromMe) return
     if (!m.isGroup) return
 
-    if (!global.db.data.aiLocal) global.db.data.aiLocal = { enabled: {}, history: {}, cooldown: {} }
-    if (!global.db.data.aiLocal.enabled[m.chat]) return
+    ensureStore()
 
-    // antispam
-    const now = Date.now()
-    const last = global.db.data.aiLocal.cooldown[m.chat] || 0
-    if (now - last < COOLDOWN_MS) return
+    const text = (m.text || "").trim()
+    if (!text) return
+
+    // 🔥 Attivazione .1 ia / .0 ia
+    if (/^\.(1|0)\s+ia$/i.test(text)) {
+      const on = text.startsWith(".1")
+      global.db.data.aiReal.enabled[m.chat] = on
+      return conn.reply(
+        m.chat,
+        on
+          ? "🤖 IA attivata nel gruppo."
+          : "🛑 IA disattivata.",
+        m
+      )
+    }
+
+    if (!global.db.data.aiReal.enabled[m.chat]) return
 
     const botJid = conn.user.jid
     const mentioned = m.mentionedJid || []
@@ -45,169 +75,41 @@ handler.before = async function (m, { conn }) {
 
     const isReplyToBot =
       m.quoted &&
-      m.quoted.sender &&
       m.quoted.sender === botJid
 
     if (!isMentioned && !isReplyToBot) return
 
-    const rawText = (m.text || "").trim()
-    const text = rawText.toLowerCase()
+    const now = Date.now()
+    const last = global.db.data.aiReal.cooldown[m.chat] || 0
+    if (now - last < COOLDOWN) return
 
-    // salva contesto (memoria corta per gruppo)
-    pushHistory(m.chat, {
-      at: now,
-      from: m.sender,
-      text: rawText.slice(0, 500)
+    global.db.data.aiReal.cooldown[m.chat] = now
+
+    pushHistory(m.chat, "user", text)
+
+    const response = await client.responses.create({
+      model: "gpt-4o-mini",
+      input: [
+        {
+          role: "system",
+          content:
+            "Sei DANGER BOT su WhatsApp. Intelligente ma sarcastico. Risposte brevi e brillanti."
+        },
+        ...getHistory(m.chat)
+      ],
+      max_output_tokens: 200
     })
 
-    const ctx = getContext(m.chat)
-    const reply = buildReply({ text, rawText, ctx, sender: m.sender })
+    const reply = response.output_text || "Hmm... riprova."
 
-    global.db.data.aiLocal.cooldown[m.chat] = now
-    await conn.sendMessage(m.chat, { text: reply, mentions: extractMentions(reply) }, { quoted: m })
+    pushHistory(m.chat, "assistant", reply)
+
+    await conn.reply(m.chat, reply.trim(), m)
 
   } catch (e) {
-    console.error("Errore AI locale:", e)
+    console.error("AI ERROR:", e)
+    conn.reply(m.chat, "❌ Errore IA. Controlla VPS.", m)
   }
 }
-
-function pushHistory(chat, item) {
-  const store = global.db.data.aiLocal.history
-  if (!store[chat]) store[chat] = []
-  store[chat].push(item)
-  if (store[chat].length > MAX_HISTORY) store[chat].splice(0, store[chat].length - MAX_HISTORY)
-}
-
-function getContext(chat) {
-  const arr = global.db.data.aiLocal.history?.[chat] || []
-  const lastUser = [...arr].reverse().find(x => x.from) || null
-  const lastTexts = arr.map(x => x.text).filter(Boolean)
-  return { lastUser, lastTexts }
-}
-
-function buildReply({ text, rawText, ctx }) {
-  // intent detection “forte” (pattern + scoring semplice)
-  const intent = detectIntent(text)
-
-  // estrai “argomento” grezzo (ultime parole)
-  const topic = extractTopic(rawText)
-
-  // risposte dinamiche
-  if (intent === "intro") {
-    return `😌 Io sono *${global.db.data.nomedelbot || "DANGER BOT"}*.\nIntelligente, sarcastico, e incredibilmente paziente.\nTaggami o rispondimi e prova a dire qualcosa di sensato.`
-  }
-
-  if (intent === "greet") {
-    return pick([
-      "Oh guarda… un saluto. Ciao 👋",
-      "Ciao. Sì, sono ancora qui. Purtroppo per te 😌",
-      "Ciao. Dimmi tutto, ma fai piano."
-    ])
-  }
-
-  if (intent === "howareyou") {
-    return pick([
-      "Sto bene. Tu invece come va con le decisioni discutibili?",
-      "Perfetto. Non posso dire lo stesso per certe chat.",
-      "Meglio di ieri, peggio di domani."
-    ])
-  }
-
-  if (intent === "thanks") {
-    return pick([
-      "Lo so, sono un dono per l’umanità 😎",
-      "Prego. Cerco di aiutarti nonostante tutto.",
-      "Di niente. Ma segnatelo: non succede spesso."
-    ])
-  }
-
-  if (intent === "insult") {
-    return pick([
-      "Ok. Ora respira e riprova con una frase adulta.",
-      "Interessante. Hai finito o vuoi peggiorare la situazione?",
-      "Se mi insulti così… immagina cosa penso io."
-    ])
-  }
-
-  if (intent === "help") {
-    // usa un po’ di contesto: cita l’ultimo messaggio umano
-    const last = ctx.lastTexts?.slice(-2)?.[0]
-    return `Va bene 😌\nDimmi *esattamente* cosa vuoi fare (1 frase).\n${last ? `Ultima cosa che ho letto: “${truncate(last, 80)}”.` : ""}`.trim()
-  }
-
-  if (intent === "question") {
-    // risposta “intelligente” generica senza API: chiarimento + suggerimento
-    return `Domanda accettabile.\n🎯 Tema: *${topic || "non identificato"}*\n` +
-      pick([
-        "Vuoi una risposta veloce o fatta bene?",
-        "Dammi un dettaglio in più e ti rispondo meglio.",
-        "Ok, ma specifica: contesto e obiettivo."
-      ])
-  }
-
-  if (intent === "commandish") {
-    return pick([
-      "Se stai cercando un comando, scrivilo chiaro. Non leggo nel pensiero… ancora.",
-      "Comandi? Sì. Caos? Anche. Spiega cosa vuoi ottenere.",
-      "Che vuoi fare: attivare, disattivare, configurare o rompere tutto?"
-    ])
-  }
-
-  // fallback con contesto
-  const lastTopic = extractTopic(ctx.lastTexts?.slice(-1)?.[0] || "")
-  return pick([
-    `Interessante… e ora che facciamo?${lastTopic ? ` (Parlavi di: *${lastTopic}*)` : ""}`,
-    `Ok. Ti ascolto. Però prova a essere specifico.`,
-    `Capito. Forse. Continua.`
-  ])
-}
-
-function detectIntent(t) {
-  const rules = [
-    ["intro", /(chi sei|presentati|come ti chiami|che sei)/i],
-    ["greet", /\b(ciao|salve|hola|buongiorno|buonasera)\b/i],
-    ["howareyou", /(come stai|tutto bene|come va)/i],
-    ["thanks", /\b(grazie|thx|ty)\b/i],
-    ["insult", /(scemo|stupido|idiota|cretino|merda|coglione)/i],
-    ["help", /(aiuto|aiutami|mi serve|puoi aiutare|help)/i],
-    ["question", /(\?|perché|come si|come faccio|che significa|cos'è)/i],
-    ["commandish", /^(\.|!|\/)/i]
-  ]
-  for (const [name, re] of rules) if (re.test(t)) return name
-  return "other"
-}
-
-function extractTopic(s) {
-  if (!s) return ""
-  // togli menzioni e prefissi
-  let t = s.replace(/@\d+/g, "").replace(/^(\.|!|\/)\w+\s*/g, "").trim()
-  if (!t) return ""
-  const words = t.split(/\s+/).filter(Boolean)
-  // prendi le ultime 3-5 parole
-  const tail = words.slice(Math.max(0, words.length - 5)).join(" ")
-  return truncate(tail, 40)
-}
-
-function truncate(s, n) {
-  if (!s) return ""
-  return s.length > n ? s.slice(0, n - 1) + "…" : s
-}
-
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-// mentions reali se metti @numero
-function extractMentions(text) {
-  const res = []
-  const matches = text.match(/@\d{6,16}/g) || []
-  for (const m of matches) res.push(m.replace("@", "") + "@s.whatsapp.net")
-  return res
-}
-
-handler.help = ["1 ia", "0 ia"]
-handler.tags = ["group"]
-handler.command = /^(1|0)$/i
-handler.group = true
 
 export default handler
