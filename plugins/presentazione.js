@@ -37,7 +37,7 @@ handler.before = async function (m, { conn }) {
 
     // ✍️ Modifica qui le funzioni reali del tuo bot
     const features = [
-      `📋 Menu: *${prefix}se vuoi sapere i miei comandi schiaccia Menú e ti fornirò tutti i comandi *`,
+      `📋 Menu: *${prefix} *`,
     ]
 
     const introText = `
@@ -46,10 +46,7 @@ handler.before = async function (m, { conn }) {
 👋 Ciao! Sono *${botName}* 🤖
 Sono un bot per gruppi WhatsApp:  offro una maggiore sicurezza al gruppo e a intrattenere la chat
 
-✨ *Cosa posso fare:*
-${features.map(x => `• ${x}`).join("\n")}
-
-📌 *Tip:* premi i bottoni sotto oppure scrivi i comandi a mano.
+📌  Premi il bottone sotto e ti fornirò tutti i miei comandi. 
 `.trim()
 
     await conn.sendMessage(m.chat, {
