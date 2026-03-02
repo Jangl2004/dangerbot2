@@ -74,7 +74,7 @@ handler.before = async function (m, { conn }) {
     try {
       await conn.reply(
         chatId,
-        "🚫 Qui non puoi mandare *foto o video normali* (antimedia attivo).\n✅ Sticker e “visibile una volta” sono consentiti.",
+        " Siete pregati di non mandare foto o video se non sono a una visual. (antimedia attivo).",
         m
       )
     } catch {}
