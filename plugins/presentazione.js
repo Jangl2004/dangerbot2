@@ -48,7 +48,7 @@ handler.before = async function (m, { conn }) {
 ⟦ 𝐈𝐍𝐅𝐎 𝐁𝐎𝐓 ⟧
 
 👋 Ciao! Sono *${botName}* 🤖
-Sono un bot per gruppi WhatsApp: utility, moderazione e comandi rapidi.
+Sono un bot per gruppi WhatsApp:  offro una maggiore sicurezza al gruppo e a intrattenere la chat
 
 ✨ *Cosa posso fare:*
 ${features.map(x => `• ${x}`).join("\n")}
@@ -61,8 +61,6 @@ ${features.map(x => `• ${x}`).join("\n")}
       footer: "PRESENTAZIONE BOT",
       buttons: [
         { buttonId: `${prefix}menu`, buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 },
-        { buttonId: `${prefix}ping`, buttonText: { displayText: "📡 𝐏𝐢𝐧𝐠" }, type: 1 },
-        { buttonId: `${prefix}top`,  buttonText: { displayText: "🏆 𝐓𝐨𝐩 𝟓" }, type: 1 }
       ],
       headerType: 1
     }, { quoted: m })
