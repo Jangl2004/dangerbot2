@@ -26,6 +26,7 @@ const handler = async (m, { conn, usedPrefix = '.' }) => {
 ➤ 🏷️ AntiTag        → ${stato(chat.antiTag)}
 ➤ 🚫 AntiGore       → ${stato(chat.antigore)}
 ➤ 🔞 AntiPorno      → ${stato(chat.antiporno)}
+➤ 📸 AntiMedia     → ${stato(chat.antimedia)}
 
 ════════════════════
 🔒 𝐌𝐎𝐃𝐀𝐋𝐈𝐓À 𝐂𝐎𝐍𝐓𝐑𝐎𝐋𝐋𝐎
