@@ -43,7 +43,7 @@ var handler = async (m, { conn, text, command }) => {
 │ ✨ Azione: ${successTitle}
 │ 🕷️ Da: @${sender.split('@')[0]}
 │
-│ ☠️ Il Nexus osserva...
+│ ☠️ The Danger osserva...
 ╰━━━━━━━━━━━━━━━━╯
 `.trim()
 
