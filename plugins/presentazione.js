@@ -1,8 +1,8 @@
-// Presentazione bot (offline) - risponde solo se menzionato + "presentati"
+// Plugin fatto da Luxifer
 
 let handler = async () => {}
 
-handler.before = async function (m, { conn, usedPrefix }) {
+handler.before = async function (m, { conn }) {
   try {
     if (!m.message) return
     if (m.isBaileys) return
@@ -15,14 +15,15 @@ handler.before = async function (m, { conn, usedPrefix }) {
     const textRaw = (m.text || "").trim()
     if (!textRaw) return
 
-    // ✅ controlla se il bot è menzionato (robusto)
+    // ✅ prende il prefisso dal messaggio (di solito ".")
+    const prefix = getPrefix(textRaw) || "."
+
+    // ✅ menzione robusta
     const mentioned = getMentionedJids(m)
     const isMentioned = mentioned.includes(botJid)
     if (!isMentioned) return
 
     const text = textRaw.toLowerCase()
-
-    // trigger
     const wantIntro =
       text.includes("presentati") ||
       text.includes("chi sei") ||
@@ -34,38 +35,34 @@ handler.before = async function (m, { conn, usedPrefix }) {
 
     const botName = global.db?.data?.nomedelbot || "DANGER BOT"
 
-    // 🧠 QUI personalizzi le funzioni che vuoi mostrare
+    // ✍️ Modifica qui le funzioni reali del tuo bot
     const features = [
-      "📡 *Ping/Stato bot* → `.ping`",
-      "🏆 *Top messaggi giornaliero* → `.top`",
-      "👋 *Welcome/Bye* (se lo hai)",
-      "🛡️ *Anti-link / Anti-spam* (se lo hai)",
-      "👑 *Comandi admin* (promote/demote, ecc.)",
-      "🎛️ *Menu comandi* → `.menu`",
+      `📡 Ping/Stato: *${prefix}ping*`,
+      `📋 Menu: *${prefix}menu*`,
+      `🏆 Top giornaliero: *${prefix}top*`,
+      `👑 Admin: *${prefix}promote* / *${prefix}demote*`,
+      `🛡️ Moderazione: *${prefix}antilink*`
     ]
 
     const introText = `
-👋 *Ciao!* Sono *${botName}* 🤖
+⟦ 𝐈𝐍𝐅𝐎 𝐁𝐎𝐓 ⟧
 
-Sono un bot per gruppi WhatsApp: moderazione, utility e comandi rapidi.
-Se mi tagghi posso guidarti nei comandi.
+👋 Ciao! Sono *${botName}* 🤖
+Sono un bot per gruppi WhatsApp: utility, moderazione e comandi rapidi.
 
-✨ *Cosa so fare:*
+✨ *Cosa posso fare:*
 ${features.map(x => `• ${x}`).join("\n")}
 
-🧭 *Suggerimento:*
-Scrivi *.menu* per vedere tutto il pannello completo.
-
-Vuoi che ti spieghi una funzione in particolare? 🙂
+📌 *Tip:* premi i bottoni sotto oppure scrivi i comandi a mano.
 `.trim()
 
-    // ✅ invio con bottoni (se la tua base li supporta)
     await conn.sendMessage(m.chat, {
       text: introText,
-      footer: "INFO BOT",
+      footer: "PRESENTAZIONE BOT",
       buttons: [
-        { buttonId: usedPrefix + "menu", buttonText: { displayText: "📋 Menu" }, type: 1 },
-        { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 Ping" }, type: 1 }
+        { buttonId: `${prefix}menu`, buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 },
+        { buttonId: `${prefix}ping`, buttonText: { displayText: "📡 𝐏𝐢𝐧𝐠" }, type: 1 },
+        { buttonId: `${prefix}top`,  buttonText: { displayText: "🏆 𝐓𝐨𝐩 𝟓" }, type: 1 }
       ],
       headerType: 1
     }, { quoted: m })
@@ -73,6 +70,13 @@ Vuoi che ti spieghi una funzione in particolare? 🙂
   } catch (e) {
     console.error("Errore presentazione:", e)
   }
+}
+
+function getPrefix(text) {
+  // prende il primo carattere se è un prefisso classico
+  const c = (text || "")[0]
+  if ([".", "!", "/", "#"].includes(c)) return c
+  return null
 }
 
 function getMentionedJids(m) {
