@@ -407,7 +407,7 @@ function extractMentions(text) {
   return res
 }
 
-handler.help = ["1", "0"]
+handler.help = ["1 ia", "0 ia"]
 handler.tags = ["group"]
 handler.command = /^(1|0)$/i
 handler.group = true
