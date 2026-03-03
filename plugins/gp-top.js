@@ -20,7 +20,7 @@ let handler = async (m, { conn, command }) => {
 
   const medaglie = ['🥇','🥈','🥉','🏅','🏅','🏅','🏅','🏅','🏅','🏅'];
 
-  let testo = `╭━━━〔 📊 *CLASSIFICA LIVE* 📊 〕━━━⬣\n`;
+  let testo = `╭━━━〔 📊 *CLASSIFICA* 📊 〕━━━⬣\n`;
   testo += `┃ 💬 Messaggi totali: *${dati.totali}*\n`;
   testo += `┃ 📅 Aggiornata in tempo reale\n`;
   testo += `╰━━━━━━━━━━━━━━━━━━⬣\n\n`;
