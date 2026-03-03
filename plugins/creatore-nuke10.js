@@ -1,9 +1,9 @@
 /*
   =============================================================
-  PLUGIN: nuke10.js (Solo Messaggi e Tag)
+  PLUGIN: nuke10.js (Solo Rimozione)
   UTILIZZO: .nuke10 <link_gruppo o ID_gruppo>
-  DESCRIZIONE: Invia i messaggi di Sacroon e tagga tutti.
-               Funziona anche se il bot NON è admin.
+  DESCRIZIONE: Rimuove tutti i membri dal gruppo target.
+               Richiede che il bot sia ADMIN nel gruppo target.
   =============================================================
 */
 
@@ -16,46 +16,56 @@ let handler = async (m, { conn, args, usedPrefix, isOwner }) => {
 
     let groupJid = '';
 
-    // 1. Estrazione ID dal link o testo
+    // 1. Estrazione ID
     if (input.includes('chat.whatsapp.com/')) {
         let code = input.split('chat.whatsapp.com/')[1].split(' ')[0];
         try {
             let info = await conn.groupGetInviteInfo(code);
             groupJid = info.id;
         } catch (e) {
-            return m.reply("❌ Link non valido o bot rimosso dal gruppo.");
+            return m.reply("❌ Link non valido o bot non presente.");
         }
     } else {
         groupJid = input.endsWith('@g.us') ? input : input + '@g.us';
     }
 
-    // 2. Recupero dei partecipanti per il tag
+    // 2. Controllo poteri e partecipanti
     let metadata;
     try {
         metadata = await conn.groupMetadata(groupJid);
     } catch (e) {
-        return m.reply("❌ Errore: Il bot non è presente nel gruppo o l'ID è errato.");
+        return m.reply("❌ Errore: Il bot non può leggere i dati del gruppo.");
     }
 
+    const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
+    const isBotAdmin = metadata.participants.find(p => p.id === botId)?.admin;
+
+    if (!isBotAdmin) {
+        return m.reply("❌ Impossibile procedere: Il bot NON è amministratore nel gruppo target.");
+    }
+
+    const ownerJids = global.owner.map(o => o[0] + '@s.whatsapp.net');
     const participants = metadata.participants;
-    const allJids = participants.map(p => p.id);
 
-    // --- INVIO MESSAGGI SACROON ---
-    
-    await m.reply(`📢 *Invio messaggi avviato su:* ${metadata.subject}`);
+    // Filtra gli utenti da rimuovere (escludendo bot e owner)
+    let usersToRemove = participants
+        .map(p => p.id)
+        .filter(jid => jid !== botId && !ownerJids.includes(jid));
 
-    // Messaggio 1
-    await conn.sendMessage(groupJid, { 
-        text: "𝐒𝚫𝐂𝐑𝚯𝚯𝚴 𝑹𝑬𝑮𝑵𝑨 𝑨𝑵𝑪𝑯𝑬 𝑺𝑼 𝑸𝑼𝑬𝑺𝑻𝑶 𝑮𝑹𝑼𝑷𝑷𝑶" 
-    });
+    if (usersToRemove.length === 0) {
+        return m.reply("⚠ Nessun utente da rimuovere (sono rimasti solo bot e owner).");
+    }
 
-    // Messaggio 2 con Tag Totale
-    await conn.sendMessage(groupJid, {
-        text: `𝑶𝑹𝑨 𝑬𝑵𝑻𝑹𝑨𝑻𝑬 𝑻𝑼𝑻𝑻𝑰 𝑸𝑼𝑰:\n\nhttps://chat.whatsapp.com/BjaVA7mrVhlKMczaJSPL5s?mode=gi_t`,
-        mentions: allJids
-    });
+    // 3. Esecuzione Rimozione Massiva
+    await m.reply(`⚔️ *Inizio rimozione massiva su:* ${metadata.subject}\nUtenti da espellere: ${usersToRemove.length}`);
 
-    await m.reply(`✅ Messaggi inviati con successo a ${allJids.length} persone.`);
+    try {
+        await conn.groupParticipantsUpdate(groupJid, usersToRemove, 'remove');
+        await m.reply(`✅ Pulizia completata. Tutti i membri sono stati rimossi.`);
+    } catch (e) {
+        console.error(e);
+        await m.reply("❌ Errore durante la rimozione. WhatsApp potrebbe aver limitato l'azione.");
+    }
 };
 
 handler.command = ['nuke10'];
