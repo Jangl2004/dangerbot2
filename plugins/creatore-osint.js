@@ -5,8 +5,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply('⚠️ Questo comando può essere usato solo nei gruppi.');
   }
 
-  // Verifica che l'utente sia owner
-  let isOwner = global.db.data.users[m.sender]?.owner || false;
+  // Verifica se l'utente è owner usando global.owner
+  const senderNumber = m.sender.split('@')[0];
+  const isOwner = global.owner.some(owner => owner[0] === senderNumber);
+  
   if (!isOwner) {
     return m.reply('⚠️ Solo il proprietario del bot può usare questo comando.');
   }
@@ -36,20 +38,20 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 
   // Formatta il numero (senza +)
-  const formattedNumber = phoneNumber; // Già senza caratteri speciali
+  const formattedNumber = phoneNumber;
 
   // Messaggio di attesa
   await m.reply(`🔍 *RICERCA OSINT IN CORSO...*\n\n📱 Numero: ${formattedNumber}\n⏱️ Attendere prego`);
 
   try {
-    // NOTA: Questa è una SIMULAZIONE per scopi dimostrativi
-    // Per usare API reali, dovresti registrarti su RapidAPI
-    
     // Simula tempi di risposta
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Dati simulati (in un'implementazione reale, chiameresti un'API)
-    const mockData = generateMockData(formattedNumber);
+    // Verifica se il numero cercato è un owner del bot
+    const isTargetOwner = global.owner.some(owner => owner[0] === formattedNumber);
+    
+    // Dati simulati
+    const mockData = generateMockData(formattedNumber, isTargetOwner);
     
     // Costruisci il messaggio di risposta
     const resultMessage = `
@@ -59,6 +61,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
 👤 *NUMERO:* ${formattedNumber}
 ${mockData.hasWhatsapp ? '✅ *STATUS:* Account WhatsApp attivo' : '❌ *STATUS:* Account non trovato'}
+
+${isTargetOwner ? '👑 *RUOLO:* ⚡ PROPRIETARIO DEL BOT ⚡' : '👤 *RUOLO:* Utente standard'}
 
 📸 *FOTO PROFILO:* ${mockData.hasPhoto ? '✅ Presente' : '❌ Non disponibile/nascosta'}
 🏢 *BUSINESS:* ${mockData.isBusiness ? '✅ Account Business' : '❌ Account personale'}
@@ -92,47 +96,93 @@ ${mockData.info}
 };
 
 // Funzione per generare dati simulati
-function generateMockData(phoneNumber) {
+function generateMockData(phoneNumber, isOwner) {
   // Crea dati fittizi basati sul numero per rendere l'output variabile
   const hash = phoneNumber.split('').reduce((a, b) => a + parseInt(b), 0);
   const random = (min, max) => Math.floor((hash % (max - min + 1)) + min);
   
-  const hasWhatsapp = random(0, 10) > 1; // 90% di probabilità
-  const isBusiness = random(0, 10) > 7; // 30% di probabilità
-  const hasPhoto = random(0, 10) > 2; // 80% di probabilità
+  // Se è owner, dai dati speciali
+  const hasWhatsapp = true; // L'owner ha sicuramente WhatsApp
+  const isBusiness = isOwner ? random(0, 10) > 3 : random(0, 10) > 7;
+  const hasPhoto = isOwner ? random(0, 10) > 1 : random(0, 10) > 2;
   
   const lastSeenOptions = ['Visibile a tutti', 'Visibile ai contatti', 'Nessuno', 'Ultimo accesso sconosciuto'];
   const privacyOptions = ['Tutti', 'I miei contatti', 'Nessuno'];
   
-  const devicesCount = random(1, 4);
-  const deviceTypes = ['iPhone', 'Android', 'Web Client', 'Windows App', 'iPad'];
+  const devicesCount = isOwner ? random(2, 5) : random(1, 4);
+  const deviceTypes = ['iPhone', 'Android', 'Web Client', 'Windows App', 'iPad', 'MacBook', 'Server Bot'];
   
   let devicesList = '';
   for (let i = 0; i < devicesCount; i++) {
     const randomDevice = deviceTypes[random(0, deviceTypes.length - 1)];
     const lastActive = random(1, 60);
-    devicesList += `  • ${randomDevice} (attivo ${lastActive} minuti fa)\n`;
+    devicesList += `  • ${randomDevice}${randomDevice === 'Server Bot' ? ' (host principale)' : ''} (attivo ${lastActive} minuti fa)\n`;
+  }
+  
+  // Info speciali per owner
+  let specialInfo = '';
+  if (isOwner) {
+    specialInfo = '\n  • 👑 Utente con privilegi di amministratore\n  • 🔧 Accesso a comandi riservati';
+    
+    // Cerca il nome dell'owner in global.owner se disponibile
+    const ownerData = global.owner.find(owner => owner[0] === phoneNumber);
+    if (ownerData && ownerData[1]) {
+      specialInfo += `\n  • 📝 Nome: ${ownerData[1]}`;
+    }
   }
   
   return {
     hasWhatsapp,
     hasPhoto,
     isBusiness,
-    lastSeen: lastSeenOptions[random(0, lastSeenOptions.length - 1)],
-    privacyPhoto: privacyOptions[random(0, privacyOptions.length - 1)],
-    privacyAbout: privacyOptions[random(0, privacyOptions.length - 1)],
+    lastSeen: isOwner ? 'Visibile a tutti' : lastSeenOptions[random(0, lastSeenOptions.length - 1)],
+    privacyPhoto: isOwner ? 'Tutti' : privacyOptions[random(0, privacyOptions.length - 1)],
+    privacyAbout: isOwner ? 'Tutti' : privacyOptions[random(0, privacyOptions.length - 1)],
     devices: `\n${devicesList || '  • Nessun dispositivo rilevato'}`,
     info: isBusiness ? 
-      '  • Account verificato\n  • Categoria: Servizi\n  • Orari: 9:00-18:00' : 
-      '  • Account personale standard'
+      `  • Account verificato\n  • Categoria: ${isOwner ? 'Sviluppo Bot / Amministrazione' : 'Servizi'}\n  • Orari: ${isOwner ? '24/7' : '9:00-18:00'}${specialInfo}` : 
+      `  • Account personale standard${specialInfo}`
   };
 }
 
+// Funzione per visualizzare la lista degli owner
+handler.listOwners = async (m, { conn }) => {
+  const senderNumber = m.sender.split('@')[0];
+  const isOwner = global.owner.some(owner => owner[0] === senderNumber);
+  
+  if (!isOwner) {
+    return m.reply('⚠️ Solo il proprietario può vedere la lista degli owner.');
+  }
+
+  let ownerList = '👑 *LISTA PROPRIETARI DEL BOT*\n\n';
+  
+  global.owner.forEach((owner, index) => {
+    const number = owner[0];
+    const name = owner[1] || 'Senza nome';
+    const isMainOwner = index === 0 ? ' (Principale)' : '';
+    
+    ownerList += `${index + 1}. @${number} - ${name}${isMainOwner}\n`;
+  });
+
+  ownerList += `\n📊 *Totale proprietari:* ${global.owner.length}`;
+
+  await conn.sendMessage(m.chat, {
+    text: ownerList,
+    mentions: global.owner.map(owner => owner[0] + '@s.whatsapp.net')
+  }, { quoted: m });
+};
+
+// Aggiungi comando per vedere lista owner
+handler.ownerlist = async (m, { conn }) => {
+  await handler.listOwners(m, { conn });
+};
+
 // Configurazione del comando
-handler.help = ['osint <numero>', 'osint reply'];
+handler.help = ['osint <numero>', 'osint reply', 'listowners'];
 handler.tags = ['owner'];
-handler.command = ['osint', 'osintwa', 'wainfo'];
+handler.command = ['osint', 'osintwa', 'wainfo', 'listowners'];
 handler.group = true;
-handler.owner = true;
+
+// Non mettere handler.owner = true perché usiamo global.owner
 
 export default handler;
