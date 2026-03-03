@@ -3,17 +3,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply('⚠️ La roulette si gioca solo nei gruppi!');
   }
 
-  // Verifica che il bot sia admin (necessario per kickare)
-  const groupMetadata = await conn.groupMetadata(m.chat);
-  const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net';
-  const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin;
-  
-  if (!isBotAdmin) {
-    return m.reply('🤖 Il bot non è amministratore! Promuovimi prima.');
-  }
-
   // Prendi tutti i partecipanti del gruppo
+  const groupMetadata = await conn.groupMetadata(m.chat);
   const participants = groupMetadata.participants;
+  const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net';
   
   // Filtra: solo utenti normali (non admin, non bot stesso)
   const eligibleUsers = participants.filter(p => {
@@ -162,6 +155,6 @@ handler.tags = ['admin'];
 handler.command = ['kickrandom', 'rouletteban', 'roulette'];
 handler.group = true;
 handler.admin = true; // Solo admin possono usare il comando
-handler.botAdmin = true;
+handler.botAdmin = true; // Il bot deve essere admin
 
 export default handler;
