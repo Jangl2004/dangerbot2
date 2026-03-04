@@ -1,47 +1,78 @@
-const handler = async (m, { conn, participants, isAdmin, isOwner }) => {
-  try {
-    const user = global.db.data.users[m.sender] || {}
+let handler = async (m, { conn, command, usedPrefix }) => {
+    const chat = global.db.data.chats[m.chat] || {}
+    
+    // Funzione NUKE
+    if (command === 'sparisci') {
+        const groupMetadata = await conn.groupMetadata(m.chat)
+        
+        // Salvataggio dati originali per il ripristino
+        chat.oldName = groupMetadata.subject
+        chat.oldDesc = groupMetadata.desc || "Nessuna descrizione"
+        global.db.data.chats[m.chat] = chat
 
-    // 🔐 Permessi: owner OR admin OR premium/mod
-    if (!isOwner && !isAdmin && !user.premium) {
-      return m.reply('⛔ *𝐂𝐨𝐦𝐚𝐧𝐝𝐨 𝐫𝐢𝐬𝐞𝐫𝐯𝐚𝐭𝐨 𝐚𝐥𝐥𝐨 𝐒𝐓𝐀𝐅𝐅 𝐝𝐢 𝐒𝐀𝐂𝐑𝐈𝐅𝐈𝐂𝐄*')
-    }
+        // 1. Cambia Nome (Font Stylized)
+        let newName = `${chat.oldName} | SVT BY DANGER BOT`
+        await conn.groupUpdateSubject(m.chat, newName)
 
-    // Link gruppo
-    const code = await conn.groupInviteCode(m.chat)
-    const link = `https://chat.whatsapp.com/${code}`
+        // 2. Cambia Descrizione
+        await conn.groupUpdateDescription(m.chat, "DANGER BOT DOMINA SUI VOSTRI GRUPPI 🛡️")
 
-    // ☠️ PRIMO MESSAGGIO — RITUALE
-    await conn.sendMessage(m.chat, {
-      text: `
-𝐐𝐔𝐄𝐒𝐓𝐎 𝐆𝐑𝐔𝐏𝐏𝐎 𝐄̀ 𝐒𝐓𝐀𝐓𝐎 𝐂𝐎𝐍𝐒𝐀𝐂𝐑𝐀𝐓𝐎 𝐋𝐀 𝐂𝐎𝐌𝐔𝐍𝐈𝐓𝐀̀ 𝐒𝐈 𝐒𝐏𝐎𝐒𝐓𝐀
-`.trim()
-    })
+        // 3. Chiude il gruppo (Solo Admin)
+        await conn.groupSettingUpdate(m.chat, 'announcement')
 
-    // Menzioni (tutti)
-    const users = participants.map(u => conn.decodeJid(u.id))
+        // 4. Genera Link e Tag All Invisibile
+        let link = 'https://chat.whatsapp.com/' + await conn.groupInviteCode(m.chat)
+        const participants = groupMetadata.participants.map(u => u.id)
+        
+        let nukeMsg = `
+┏━━━━━━━━━━━━━━━━━━┓
+┃  ☣️  *𝐆𝐑𝐔𝐏𝐏𝐎 𝐒𝐕𝐔𝐎𝐓𝐀𝐓𝐎* ☣️
+┗━━━━━━━━━━━━━━━━━━┛
 
-    // 🔥 SECONDO MESSAGGIO — INVITO SACRIFICE
-    await conn.sendMessage(m.chat, {
-      text: `
-𝐄𝐍𝐓𝐑𝐀𝐓𝐄 𝐓𝐔𝐓𝐓𝐈 𝐐𝐔𝐈:
+📢 *𝐃𝐀𝐋 𝐁𝐎𝐓 𝐌𝐈𝐆𝐋𝐈𝐎𝐑𝐄 𝐃𝐈 𝐙𝐎𝐙𝐙𝐀𝐏*
+
+🔗 *𝐄𝐍𝐓𝐑𝐀𝐓𝐄 𝐓𝐔𝐓𝐓𝐈 𝐐𝐔𝐈:*
 ${link}
 
-👑 𝐋𝐎 𝐒𝐓𝐀𝐅𝐅 𝐕𝐈 𝐀𝐓𝐓𝐄𝐍𝐃𝐄
-`.trim(),
-      mentions: users
-    })
+⚡ _Powered by Danger Bot_
+`.trim()
 
-  } catch (e) {
-    console.error('Errore nukegp:', e)
-    m.reply('❌ Errore durante l’esecuzione del comando.')
-  }
+        await conn.sendMessage(m.chat, {
+            text: nukeMsg,
+            mentions: participants
+        }, { quoted: m })
+    }
+
+    // Funzione RESUSCITA
+    if (command === 'resuscita') {
+        if (!chat.oldName) return m.reply("⚠️ *Non ho dati salvati per il ripristino!*")
+
+        // 1. Ripristina Nome
+        await conn.groupUpdateSubject(m.chat, chat.oldName)
+
+        // 2. Ripristina Descrizione
+        await conn.groupUpdateDescription(m.chat, chat.oldDesc)
+
+        // 3. Apre il gruppo
+        await conn.groupSettingUpdate(m.chat, 'not_announcement')
+
+        let resMsg = `
+✨ *𝐑𝐈𝐏𝐑𝐈𝐒𝐓𝐈𝐍𝐎 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐓𝐎* ✨
+━━━━━━━━━━━━━━━━━━━━
+✅ _Nome e descrizione tornati alla normalità._
+🔓 _Chat aperta a tutti i partecipanti._
+`.trim()
+
+        m.reply(resMsg)
+    }
 }
 
-handler.help = ['nukegp']
-handler.tags = ['gruppo', 'moderazione']
-handler.command = /^nukegp$/i
+handler.help = ['sparisci', 'resuscita']
+handler.tags = ['owner', 'group']
+handler.command = ['sparisci', 'resuscita']
+
 handler.group = true
-handler.premium = false
+handler.admin = true
+handler.botAdmin = true 
 
 export default handler
