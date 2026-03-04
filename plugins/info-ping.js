@@ -6,7 +6,6 @@ let handler = async (m, { conn, usedPrefix }) => {
     const uptimeMs = process.uptime() * 1000;
     const uptimeStr = clockString(uptimeMs);
 
-    // ✅ Ping reale (NO messaggi extra)
     const speed = await getRealPing(conn);
 
     const totalMem = os.totalmem();
@@ -19,6 +18,9 @@ let handler = async (m, { conn, usedPrefix }) => {
 
     const botName = global.db?.data?.nomedelbot || "𝑑𝑎𝑛𝑔𝑒𝑟 𝑏𝑜𝑡";
 
+    // 👑 OWNER
+    const ownerName = "Führer Luxifer"; // cambia qui se vuoi
+
     const botStartTime = new Date(Date.now() - uptimeMs);
     const activationTime = botStartTime.toLocaleString('it-IT', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -30,7 +32,6 @@ let handler = async (m, { conn, usedPrefix }) => {
       year: 'numeric',
     });
 
-    // ✅ Extra info (aggiunte senza cambiare il resto)
     const wsState = getWsState(conn);
     const cores = os.cpus()?.length || 0;
     const load = os.loadavg ? os.loadavg() : [0, 0, 0];
@@ -49,6 +50,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ 🟢 *_WS_*        : ${wsState}
 │ 🧩 *_Node_*      : ${nodeVer}
 │ 💾 *_RAM GB_*    : ${usedMemGB}/${totalMemGB} GB
+│ 👑 *_Owner_*    : ${ownerName}
 ╰───────────────
 
 🟢 *_Tutti i sistemi attivi_*
@@ -69,10 +71,8 @@ let handler = async (m, { conn, usedPrefix }) => {
   }
 };
 
-// ✅ Ping reale senza inviare messaggi (niente doppio output)
 async function getRealPing(conn) {
   try {
-    // WebSocket ping (se disponibile)
     if (conn?.ws && typeof conn.ws.ping === 'function') {
       const t0 = Date.now();
       await conn.ws.ping();
@@ -80,8 +80,6 @@ async function getRealPing(conn) {
       return Number.isFinite(ms) ? ms.toString() : "0";
     }
 
-    // Fallback "preciso" locale (non invia nulla): misura latenza event-loop
-    // (Se ws.ping non esiste nella tua base)
     const t0 = Date.now();
     await new Promise((resolve) => setImmediate(resolve));
     const ms = Date.now() - t0;
@@ -93,7 +91,6 @@ async function getRealPing(conn) {
 
 function getWsState(conn) {
   const rs = conn?.ws?.readyState;
-  // standard ws readyState: 0 CONNECTING, 1 OPEN, 2 CLOSING, 3 CLOSED
   if (rs === 1) return "OPEN";
   if (rs === 0) return "CONNECTING";
   if (rs === 2) return "CLOSING";
