@@ -1,14 +1,1 @@
-# Netscape HTTP Cookie File
-# https://curl.haxx.se/rfc/cookie_spec.html
-# This is a generated file! Do not edit.
 
-.youtube.com	TRUE	/	TRUE	1796805913	__Secure-1PSIDTS	sidts-CjQBflaCdXChor0HyUYUoy8S54SM1MP7TakVFAcT8RT3YlldngjbwvalW30YtJYU89FlwmJTEAA
-.youtube.com	TRUE	/	TRUE	1807264149	PREF	tz=Europe.Rome
-.youtube.com	TRUE	/	TRUE	1806832144	__Secure-YENID	13.YTE=VbbwT-TZmv_S7KzOt3cBjdoORx2DGw40RlXxROhU38wa5ufpmFO8mKIPrcO7skN86rrtHvu33hi9nqTXRUj2riGMwTXyCnjglQtyBq5DtEsn9w1Z2SFKNFUAZnVkslVOyGwrTFM5255p2qT4GZpIgN8XqGB9cp8TCyishHI8GNG7pnPDXbbkR-Gbsyg93HLDzCAYaOzJnzP13igDr0eixwgOwjnwTqSdTtQ-VCiTIUnM70MR7s5BJl1Hm1X_xG3NbzEQire5CyoduWr2PXC8d8kWkhf3lGKS-06Tf9Biyf-0hqnNjB-LW4WFGgxZRZpK3HA9l0hjF3etLpVacS1ZFw
-.youtube.com	TRUE	/	TRUE	1806832148	SOCS	CAISEwgDEgk4Nzc5OTExNzcaAml0IAEaBgiAj6PNBg
-.youtube.com	TRUE	/	TRUE	1772705948	GPS	1
-.youtube.com	TRUE	/	TRUE	1788256148	__Secure-BUCKET	CP4E
-.youtube.com	TRUE	/	TRUE	0	YSC	xxyaOJ35Sp8
-.youtube.com	TRUE	/	TRUE	1788256150	VISITOR_INFO1_LIVE	Q1zINMjSVe0
-.youtube.com	TRUE	/	TRUE	1788256150	VISITOR_PRIVACY_METADATA	CgJJVBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAy
-.youtube.com	TRUE	/	TRUE	1788256148	__Secure-ROLLOUT_TOKEN	CNy92Lm10drvThDE4pnHvYiTAxje5Y_IvYiTAw%3D%3D
