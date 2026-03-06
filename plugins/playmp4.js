@@ -1,68 +1,34 @@
 import fetch from 'node-fetch'
 
-const PROVIDER_BASE = 'https://api.cobalt.tools/api/json'
-
-async function getVideoFromProvider(url) {
-  const res = await fetch(PROVIDER_BASE, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      url,
-      audioOnly: false
-    })
-  })
-
-  const raw = await res.text()
-
-  if (!res.ok) {
-    throw new Error(`Provider HTTP ${res.status}: ${raw.slice(0, 200)}`)
-  }
-
-  let data
-  try {
-    data = JSON.parse(raw)
-  } catch {
-    throw new Error(`Provider non ha restituito JSON valido: ${raw.slice(0, 200)}`)
-  }
-
-  if (!data?.url) {
-    throw new Error('Il provider non ha restituito un link video valido')
-  }
-
-  return data.url
-}
-
 const handler = async (m, { conn, text }) => {
-  if (!text) return conn.reply(m.chat, '❌ URL mancante.', m)
 
-  await conn.reply(m.chat, '🎬 *Scarico video...*', m)
+if (!text) return conn.reply(m.chat,'❌ URL mancante',m)
 
-  try {
-    const videoUrl = await getVideoFromProvider(text)
+await conn.reply(m.chat,'🎬 Scarico video...',m)
 
-    await conn.sendMessage(
-      m.chat,
-      {
-        video: { url: videoUrl },
-        caption: '🎬 Ecco il tuo video'
-      },
-      { quoted: m }
-    )
-  } catch (e) {
-    console.error('[playmp4]', e)
-    await conn.reply(
-      m.chat,
-      `❌ *Errore download video*\n${e.message || e}`,
-      m
-    )
-  }
+try {
+
+let api = `https://api.siputzx.my.id/api/d/ytmp4?url=${text}`
+
+let res = await fetch(api)
+let json = await res.json()
+
+if(!json.status) throw 'Provider error'
+
+let video = json.data.dl
+
+await conn.sendMessage(m.chat,{
+video:{url:video},
+caption:'🎬 Ecco il tuo video'
+},{quoted:m})
+
+} catch(e){
+
+conn.reply(m.chat,'❌ Errore download video',m)
+
 }
 
-handler.help = ['playmp4 <url>']
-handler.tags = ['downloader']
-handler.command = ['playmp4']
+}
 
+handler.command = ['playmp4']
 export default handler
