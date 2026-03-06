@@ -1,36 +1,34 @@
-import fetch from 'node-fetch'
+import { resolveDownload } from '../lib/play-providers.js'
 
 const handler = async (m, { conn, text }) => {
+  if (!text) return conn.reply(m.chat, '❌ URL mancante.', m)
 
-if (!text) return conn.reply(m.chat,'❌ URL mancante',m)
+  await conn.reply(m.chat, '🎧 *Scarico audio...*', m)
 
-await conn.reply(m.chat,'🎧 Scarico audio...',m)
+  try {
+    const result = await resolveDownload('mp3', text)
 
-try {
-
-let res = await fetch(`https://api.vevioz.com/api/button/mp3/${encodeURIComponent(text)}`)
-
-let html = await res.text()
-
-let match = html.match(/https?:\/\/[^"]+\.mp3/)
-
-if(!match) throw 'Audio non trovato'
-
-let audio = match[0]
-
-await conn.sendMessage(m.chat,{
-audio:{url:audio},
-mimetype:'audio/mpeg'
-},{quoted:m})
-
-} catch(e){
-
-conn.reply(m.chat,'❌ Errore download audio',m)
-
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: result.url },
+        mimetype: 'audio/mpeg',
+        fileName: 'audio.mp3'
+      },
+      { quoted: m }
+    )
+  } catch (e) {
+    console.error('[playmp3] ERRORE FINALE:', e)
+    await conn.reply(
+      m.chat,
+      `❌ *Errore download audio*\n${e.message || e}`,
+      m
+    )
+  }
 }
 
-}
-
+handler.help = ['playmp3 <url>']
+handler.tags = ['downloader']
 handler.command = ['playmp3']
 
 export default handler
