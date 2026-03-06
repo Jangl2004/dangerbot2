@@ -1,33 +1,57 @@
 import fetch from 'node-fetch'
 
 const handler = async (m, { conn, text }) => {
+  if (!text) return conn.reply(m.chat, '❌ URL mancante', m)
 
-if (!text) return conn.reply(m.chat,'❌ URL mancante',m)
+  await conn.reply(m.chat, '🎧 Scarico audio...', m)
 
-await conn.reply(m.chat,'🎧 Scarico audio...',m)
+  try {
+    const api = `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(text)}`
+    const res = await fetch(api, {
+      headers: {
+        'accept': 'application/json',
+        'user-agent': 'Mozilla/5.0'
+      }
+    })
 
-try {
+    const raw = await res.text()
+    console.log('[playmp3] STATUS:', res.status)
+    console.log('[playmp3] RAW:', raw)
 
-let api = `https://api.siputzx.my.id/api/d/ytmp3?url=${text}`
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} | ${raw.slice(0, 300)}`)
+    }
 
-let res = await fetch(api)
-let json = await res.json()
+    let json
+    try {
+      json = JSON.parse(raw)
+    } catch {
+      throw new Error(`Risposta non JSON: ${raw.slice(0, 300)}`)
+    }
 
-if(!json.status) throw 'Provider error'
+    const audio =
+      json?.data?.dl ||
+      json?.data?.url ||
+      json?.url ||
+      json?.result?.download
 
-let audio = json.data.dl
+    if (!audio) {
+      throw new Error(`Nessun link audio trovato nella risposta: ${raw.slice(0, 300)}`)
+    }
 
-await conn.sendMessage(m.chat,{
-audio:{url:audio},
-mimetype:'audio/mpeg'
-},{quoted:m})
-
-} catch(e){
-
-conn.reply(m.chat,'❌ Errore download audio',m)
-
-}
-
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: audio },
+        mimetype: 'audio/mpeg',
+        fileName: 'audio.mp3'
+      },
+      { quoted: m }
+    )
+  } catch (e) {
+    console.error('[playmp3] ERRORE:', e)
+    await conn.reply(m.chat, `❌ Errore download audio\n${e.message || e}`, m)
+  }
 }
 
 handler.command = ['playmp3']
