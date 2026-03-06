@@ -124,7 +124,7 @@ export async function before(m, { conn, isAdmin, isBotAdmin, isOwner, isROwner }
     const text = extractTextFromMessage(m)
 
     if (await containsSuspiciousLink(text)) {
-      const reason = '🚫 Link WhatsApp o URL sospetto rilevato.'
+      const reason = 'Ma che fai, volevi spammare il tuo gruppo di merda percaso? '
       await handleViolation(conn, m, reason, isBotAdmin)
       return true
     }
