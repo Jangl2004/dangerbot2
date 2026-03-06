@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-const PROVIDER_BASE = 'http://127.0.0.1:9000/'
+const PROVIDER_BASE = 'https://api.cobalt.tools/api/json'
 
 async function getVideoFromProvider(url) {
   const res = await fetch(PROVIDER_BASE, {
