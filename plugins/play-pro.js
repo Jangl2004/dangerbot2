@@ -11,8 +11,8 @@ const handler = async (m, { conn, text, usedPrefix }) => {
 
   await conn.reply(m.chat, '🔎 *Cerco su YouTube...*', m)
 
-  const search = await yts(text)
-  const video = search?.videos?.[0]
+  const result = await yts(text)
+  const video = result?.videos?.[0]
 
   if (!video) {
     return conn.reply(m.chat, '❌ Nessun risultato trovato.', m)
