@@ -1,75 +1,34 @@
-let telegramRegex = /(?:https?:\/\/)?(?:www\.)?(t\.me|telegram\.me)\/[^\s]*/i;
+let handler = async (m, { args, isAdmin, isOwner }) => {
+  if (!m.isGroup) return m.reply('Questo comando funziona solo nei gruppi.')
+  if (!isAdmin && !isOwner) return m.reply('Solo gli amministratori possono usare questo comando.')
 
-export async function before(m, { isAdmin, isPrems, isBotAdmin, conn }) {
-  if (m.isBaileys || m.fromMe) return true;
-  if (!m.isGroup) return false;
+  global.db.data.chats = global.db.data.chats || {}
+  global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {}
 
-  let chat = global.db.data.chats[m.chat];
-  if (!chat) return false;
+  let chat = global.db.data.chats[m.chat]
 
-  const warnLimit = 3;
-  const senderId = m.key.participant;
-  const messageId = m.key.id;
+  if (!args[0]) {
+    return m.reply(`⚡ *ANTI-TELEGRAM*
 
-  const isTelegramLink = telegramRegex.exec(m.text);
+Stato attuale: *${chat.antiTelegram === false ? 'DISATTIVATO' : 'ATTIVO'}*
 
-  if (chat.antiTelegram && isTelegramLink && !isAdmin && !isPrems && isBotAdmin) {
-
-    global.db.data.users[m.sender] ??= {};
-    global.db.data.users[m.sender].warn ??= 0;
-    global.db.data.users[m.sender].warnReasons ??= [];
-
-    global.db.data.users[m.sender].warn += 1;
-    global.db.data.users[m.sender].warnReasons.push('link telegram');
-
-    // Cancella il messaggio
-    try {
-      await conn.sendMessage(m.chat, {
-        delete: {
-          remoteJid: m.chat,
-          fromMe: false,
-          id: messageId,
-          participant: senderId,
-        },
-      });
-    } catch (e) {
-      console.error('Errore nella cancellazione del messaggio:', e);
-    }
-
-    let warnCount = global.db.data.users[m.sender].warn;
-    let remaining = warnLimit - warnCount;
-
-    if (warnCount < warnLimit) {
-      await conn.sendMessage(m.chat, {
-        text: `╔═══━─━─━─━─━─━─━═══╗
-⚡ 𝐃𝐀𝐍𝐆𝐄𝐑 𝐁𝐎𝐓 • ANTI-TELEGRAM
-╚═══━─━─━─━─━─━─━═══╝
-🚨 Link Telegram rilevato
-
-🔹 Avvertimento: ${warnCount}/${warnLimit}
-🔹 Rimangono: ${remaining}
-
-Prossima violazione → espulsione.
-━━━━━━━━━━━━━━━━━━`
-      });
-    } else {
-      global.db.data.users[m.sender].warn = 0;
-      global.db.data.users[m.sender].warnReasons = [];
-
-      try {
-        await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-        await conn.sendMessage(m.chat, {
-          text: `⛔ @${m.sender.split('@')[0]} RIMOSSO DAL GRUPPO DOPO 3 AVVERTIMENTI`,
-          mentions: [m.sender]
-        });
-      } catch {
-        await conn.sendMessage(m.chat, {
-          text: `⚠️ @${m.sender.split('@')[0]} DOVREBBE ESSERE RIMOSSO, MA IL BOT NON È ADMIN`,
-          mentions: [m.sender]
-        });
-      }
-    }
+Comandi:
+.antitelegram on
+.antitelegram off`)
   }
 
-  return true;
+  if (args[0].toLowerCase() === 'on') {
+    chat.antiTelegram = true
+    return m.reply('✅ AntiTelegram attivato.')
+  }
+
+  if (args[0].toLowerCase() === 'off') {
+    chat.antiTelegram = false
+    return m.reply('❌ AntiTelegram disattivato.')
+  }
+
+  return m.reply('Usa: .antitelegram on oppure .antitelegram off')
 }
+
+handler.command = ['antitelegram']
+export default handler
