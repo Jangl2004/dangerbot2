@@ -2,70 +2,56 @@ import yts from 'yt-search'
 import { exec } from 'child_process'
 import fs from 'fs'
 
-// Questa è la funzione principale che l'handler eseguirà
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) return m.reply(`🎵 *Usa:* ${usedPrefix + command} nome canzone`)
 
-    try {
-        // Messaggio di attesa
-        await m.reply('🔎 *Ricerca su YouTube...*')
+    await m.reply('🔎 *Ricerca su YouTube...*')
+    let search = await yts(text)
+    let v = search.videos[0]
+    if (!v) return m.reply('❌ Nessun risultato trovato')
 
-        let search = await yts(text)
-        let v = search.videos[0]
-        if (!v) return m.reply('❌ Nessun risultato trovato')
+    // Creiamo una struttura temporanea nel bot
+    // Usiamo il messaggio corrente come "trigger" per la risposta successiva
+    let caption = `🎧 *GIUSEBOT PLAYER*\n\n📝 *Titolo:* ${v.title}\n\n*Rispondi* a questo messaggio con:\n1️⃣ per MP3\n2️⃣ per MP4`
+    
+    let sentMsg = await conn.sendMessage(m.chat, { image: { url: v.thumbnail }, caption: caption }, { quoted: m })
 
-        let caption = `🎧 *GIUSEBOT PLAYER*\n\n`
-        caption += `📝 *Titolo:* ${v.title}\n`
-        caption += `⏱️ *Durata:* ${v.timestamp}\n`
-        caption += `📺 *Canale:* ${v.author.name}\n\n`
-        caption += `*Rispondi* a questo messaggio con:\n`
-        caption += `1️⃣ per scaricare l'audio (MP3)\n`
-        caption += `2️⃣ per scaricare il video (MP4)`
+    // Definiamo un mini-handler temporaneo che ascolta la risposta
+    // Questo è il modo più pulito per farlo senza dipendere dal tuo handler.js
+    const id = sentMsg.key.id
+    
+    conn.ev.on('messages.upsert', async (msgUpdate) => {
+        let msg = msgUpdate.messages[0]
+        if (!msg.message || !msg.message.extendedTextMessage) return
+        
+        let quotedId = msg.message.extendedTextMessage.contextInfo?.stanzaId
+        if (quotedId !== id) return
+        
+        let choice = msg.message.extendedTextMessage.text.trim()
+        if (choice !== '1' && choice !== '2') return
 
-        // Inviamo l'immagine con le istruzioni
-        let sentMsg = await conn.sendMessage(m.chat, {
-            image: { url: v.thumbnail },
-            caption: caption,
-            footer: 'GiuseBot'
-        }, { quoted: m })
+        // Rimuoviamo l'evento dopo aver ricevuto la risposta
+        conn.ev.removeAllListeners('messages.upsert')
 
-        // Gestione della risposta tramite waitForResponse (che è presente nel tuo handler!)
-        conn.waitForResponse(m.chat, m.sender, {
-            timeout: 60000,
-            filter: (msg) => msg.quoted && msg.quoted.id === sentMsg.key.id,
-            onTimeout: () => console.log('Timeout download play')
-        }).then(async (response) => {
-            if (!response) return
-            let scelta = response.text.trim()
-            
-            if (scelta === '1') {
-                await downloadMedia(m, conn, v.url, 'mp3')
-            } else if (scelta === '2') {
-                await downloadMedia(m, conn, v.url, 'mp4')
-            }
-        })
-
-    } catch (e) {
-        console.error(e)
-        m.reply('❌ Errore durante la ricerca')
-    }
+        let type = choice === '1' ? 'mp3' : 'mp4'
+        await downloadMedia(m, conn, v.url, type)
+    })
 }
 
-// Funzione di supporto per il download
 async function downloadMedia(m, conn, url, type) {
     const file = `./tmp/${Date.now()}.${type}`
     if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp')
 
-    await m.reply(`⏳ Scaricamento ${type.toUpperCase()}...`)
-
+    await m.reply(`⏳ Scaricamento ${type.toUpperCase()} in corso...`)
+    
     const cmd = type === 'mp3' 
         ? `yt-dlp -x --audio-format mp3 -o "${file}" "${url}"`
-        : `yt-dlp -f mp4 -o "${file}" "${url}"`
+        : `yt-dlp -f "best[ext=mp4]" -o "${file}" "${url}"`
 
     exec(cmd, async (err) => {
-        if (err) return m.reply('❌ Errore nel download. Assicurati che yt-dlp sia installato sul server.')
-
-        const buffer = fs.readFileSync(file)
+        if (err) return m.reply('❌ Errore durante il download')
+        
+        let buffer = fs.readFileSync(file)
         if (type === 'mp3') {
             await conn.sendMessage(m.chat, { audio: buffer, mimetype: 'audio/mpeg' }, { quoted: m })
         } else {
@@ -75,9 +61,5 @@ async function downloadMedia(m, conn, url, type) {
     })
 }
 
-// Fondamentale: l'handler deve essere esportato così per funzionare con il tuo sistema
 handler.command = ['play']
-handler.help = ['play']
-handler.tags = ['downloader']
-
 export default handler
