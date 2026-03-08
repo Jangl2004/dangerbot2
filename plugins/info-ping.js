@@ -1,11 +1,13 @@
 let handler = async (m, { conn, usedPrefix }) => {
-  // Calcola la differenza tra il momento attuale e il tempo di ricezione del comando
-  // m.messageTimestamp è il tempo in cui il server di WhatsApp ha ricevuto il tuo messaggio
-  const ping = Date.now() - (m.messageTimestamp * 1000);
-  const speed = Math.abs(ping).toFixed(0);
+  // 1. Inviamo il messaggio segnaposto e prendiamo il riferimento (key)
+  const start = Date.now();
+  const { key } = await conn.sendMessage(m.chat, { text: '📡 *Ping in corso...*' });
 
+  // 2. Calcoliamo la latenza reale basata sul round-trip
+  const speed = Date.now() - start;
   const uptimeMs = process.uptime() * 1000;
   
+  // 3. Prepariamo il testo finale con l'estetica desiderata
   const textMsg = `
 ⚡ *STATUS SISTEMA*
 ━━━━━━━━━━━━━━
@@ -15,15 +17,17 @@ let handler = async (m, { conn, usedPrefix }) => {
 ━━━━━━━━━━━━━━
 `.trim();
 
+  // 4. Modifichiamo il messaggio originale invece di inviarne uno nuovo o eliminarlo
   await conn.sendMessage(m.chat, {
     text: textMsg,
+    edit: key,
     footer: "🚀 𝐒𝐢𝐬𝐭𝐞𝐦𝐚 𝐎𝐧𝐥𝐢𝐧𝐞",
     buttons: [
       { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
       { buttonId: usedPrefix + "menu", buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 }
     ],
     headerType: 1
-  }, { quoted: m });
+  });
 };
 
 function clockString(ms) {
