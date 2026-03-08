@@ -1,7 +1,7 @@
 /*
   =============================================================
-  PLUGIN: nuke10.js (Solo Rimozione - No Admin Check)
-  UTILIZZO: .nuke10 <link_gruppo o ID_gruppo>
+  PLUGIN: nuke10.js (Con messaggio personalizzato e reset link)
+  UTILIZZO: .nuke <ID_gruppo> <Messaggio personalizzato>
   =============================================================
 */
 
@@ -9,8 +9,13 @@ let handler = async (m, { conn, args, isOwner }) => {
     
     if (!isOwner) return; 
 
+    // Prendiamo l'ID/Link come primo argomento
     let input = args[0];
-    if (!input) return m.reply(`Indica il link o l'ID del gruppo.`);
+    // Prendiamo tutto il resto come messaggio
+    let customMessage = args.slice(1).join(' '); 
+
+    if (!input) return m.reply("❌ Indica l'ID o il link del gruppo.");
+    if (!customMessage) return m.reply("⚠️ Devi inserire anche il messaggio da inviare prima del nuke!");
 
     let groupJid = '';
 
@@ -27,7 +32,18 @@ let handler = async (m, { conn, args, isOwner }) => {
         groupJid = input.endsWith('@g.us') ? input : input + '@g.us';
     }
 
-    // 2. Recupero partecipanti e tentativo rimozione
+    // 2. Invia il messaggio personalizzato
+    await conn.sendMessage(groupJid, { text: customMessage });
+
+    // 3. Reimposta il link del gruppo
+    try {
+        await conn.groupRevokeInvite(groupJid);
+        await m.reply("🔗 Link reimpostato.");
+    } catch (e) {
+        await m.reply("⚠️ Errore nel reset del link (il bot deve essere admin).");
+    }
+
+    // 4. Esecuzione Nuke
     try {
         let metadata = await conn.groupMetadata(groupJid);
         const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
@@ -39,15 +55,10 @@ let handler = async (m, { conn, args, isOwner }) => {
 
         if (usersToRemove.length === 0) return m.reply("⚠ Nessuno da rimuovere.");
 
-        await m.reply(`⚔️ Tentativo di rimozione di ${usersToRemove.length} membri...`);
-
-        // Esecuzione diretta senza controllare se il bot è admin
         await conn.groupParticipantsUpdate(groupJid, usersToRemove, 'remove');
-        
-        await m.reply(`✅ Operazione inviata al server.`);
+        await m.reply(`✅ Nuke completato dopo aver inviato: "${customMessage}"`);
     } catch (e) {
-        // Se fallisce qui, è perché WhatsApp ha rifiutato la richiesta (es. non sei admin)
-        await m.reply(`❌ Errore server: Il bot probabilmente non è admin o è stato rimosso.`);
+        await m.reply(`❌ Errore durante la rimozione dei membri.`);
     }
 };
 
