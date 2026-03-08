@@ -1,11 +1,11 @@
 let handler = async (m, { conn, usedPrefix }) => {
   const start = Date.now();
   
-  // 1. Inviamo il messaggio iniziale
-  const sentMsg = await conn.sendMessage(m.chat, { text: '📡 *Ping in corso...*' }, { quoted: m });
-  
-  // 2. Calcoliamo la latenza
+  // Eseguiamo un ping fittizio verso il server di WhatsApp 
+  // senza inviare messaggi extra in chat
+  await conn.sendPresenceUpdate('recording', m.chat);
   const speed = Date.now() - start;
+  
   const uptimeMs = process.uptime() * 1000;
   
   const textMsg = `
@@ -17,17 +17,16 @@ let handler = async (m, { conn, usedPrefix }) => {
 ━━━━━━━━━━━━━━
 `.trim();
 
-  // 3. Editiamo il messaggio precedente usando il suo ID (key)
+  // Inviamo il messaggio definitivo direttamente
   await conn.sendMessage(m.chat, {
     text: textMsg,
-    edit: sentMsg.key,
     footer: "🚀 𝐒𝐢𝐬𝐭𝐞𝐦𝐚 𝐎𝐧𝐥𝐢𝐧𝐞",
     buttons: [
       { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
       { buttonId: usedPrefix + "menu", buttonText: { displayText: "📋 𝐌𝐞𝐧𝐮" }, type: 1 }
     ],
     headerType: 1
-  });
+  }, { quoted: m });
 };
 
 function clockString(ms) {
