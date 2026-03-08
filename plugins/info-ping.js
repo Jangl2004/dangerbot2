@@ -1,10 +1,8 @@
-// Plugin fatto da dildo
 let handler = async (m, { conn, usedPrefix }) => {
-  const start = Date.now();
-  // Invio e cancellazione immediata per misurare la latenza reale
-  const { key } = await conn.sendMessage(m.chat, { text: '...' });
-  const speed = Date.now() - start;
-  await conn.sendMessage(m.chat, { delete: key });
+  // Calcola la differenza tra il momento attuale e il tempo di ricezione del comando
+  // m.messageTimestamp è il tempo in cui il server di WhatsApp ha ricevuto il tuo messaggio
+  const ping = Date.now() - (m.messageTimestamp * 1000);
+  const speed = Math.abs(ping).toFixed(0);
 
   const uptimeMs = process.uptime() * 1000;
   
