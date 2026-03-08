@@ -1,13 +1,13 @@
 let handler = async (m, { conn, usedPrefix }) => {
-  // 1. Inviamo il messaggio segnaposto e prendiamo il riferimento (key)
   const start = Date.now();
-  const { key } = await conn.sendMessage(m.chat, { text: '📡 *Ping in corso...*' });
-
-  // 2. Calcoliamo la latenza reale basata sul round-trip
+  
+  // 1. Inviamo il messaggio iniziale
+  const sentMsg = await conn.sendMessage(m.chat, { text: '📡 *Ping in corso...*' }, { quoted: m });
+  
+  // 2. Calcoliamo la latenza
   const speed = Date.now() - start;
   const uptimeMs = process.uptime() * 1000;
   
-  // 3. Prepariamo il testo finale con l'estetica desiderata
   const textMsg = `
 ⚡ *STATUS SISTEMA*
 ━━━━━━━━━━━━━━
@@ -17,10 +17,10 @@ let handler = async (m, { conn, usedPrefix }) => {
 ━━━━━━━━━━━━━━
 `.trim();
 
-  // 4. Modifichiamo il messaggio originale invece di inviarne uno nuovo o eliminarlo
+  // 3. Editiamo il messaggio precedente usando il suo ID (key)
   await conn.sendMessage(m.chat, {
     text: textMsg,
-    edit: key,
+    edit: sentMsg.key,
     footer: "🚀 𝐒𝐢𝐬𝐭𝐞𝐦𝐚 𝐎𝐧𝐥𝐢𝐧𝐞",
     buttons: [
       { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
