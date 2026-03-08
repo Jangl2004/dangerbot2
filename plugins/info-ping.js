@@ -36,21 +36,17 @@ let handler = async (m, { conn, usedPrefix }) => {
     const nodeVer = process.version;
 
  const textMsg =`
-╔═══〔 ⚙️ 𝑺𝑻𝑨𝑻𝑶 ⚙️ 〕═══╗
-
+╔═══〔 ⚙️ PING BOT ⚙️ 〕═══╗
 ╭─❖ 「 📡 PERFORMANCE 」 ❖─╮
 │ ⚡ Ping        : ${speed} ms
 │ 🕒 Uptime      : ${uptimeStr}
 ╰───────────────╯
-
 ╭─❖ 「 📅 ATTIVAZIONE 」 ❖─╮
 │ 🟢 Attivo : ${activationTime}
 ╰───────────────╯
-
 ╭─❖ 「 👑 OWNER 」 ❖─╮
 │ LUXIFER
 ╰───────────╯
-
 ╚═══════════════╝
 `.trim();
 
