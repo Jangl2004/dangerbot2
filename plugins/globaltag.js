@@ -1,39 +1,38 @@
-module.exports = {
-    name: 'globaltag',
-    category: 'admin', // Solo per admin o proprietario
-    async execute(client, message, args) {
-        // 1. Prendi il testo dopo il comando .globaltag
-        const testoAnnuncio = args.join(' ');
-        
-        if (!testoAnnuncio) {
-            return message.reply("❌ Errore: Scrivi un messaggio dopo il comando!\nEsempio: `.globaltag Ciao a tutti!`");
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+    // 1. Controllo se hai scritto un messaggio
+    if (!text) return m.reply(`❌ Errore: Scrivi un messaggio!\nEsempio: ${usedPrefix}${command} Attenzione a tutti!`);
+
+    // 2. Recupero tutti i gruppi (Gid)
+    const groups = Object.entries(conn.chats)
+        .filter(([jid, chat]) => jid.endsWith('@g.us') && chat.isChats)
+        .map(([jid]) => jid);
+
+    m.reply(`🚀 Invio globale in corso su ${groups.length} gruppi...`);
+
+    // 3. Ciclo di invio con ritardo
+    for (let id of groups) {
+        try {
+            const groupMetadata = await conn.groupMetadata(id);
+            const participants = groupMetadata.participants.map(p => p.id);
+            
+            await conn.sendMessage(id, { 
+                text: `📢 *ANNUNCIO GLOBALE*\n\n${text}`, 
+                mentions: participants 
+            });
+
+            // Aspetta 3 secondi per evitare il ban
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        } catch (e) {
+            console.error(`Errore nel gruppo ${id}:`, e);
         }
-
-        // 2. Recupera tutte le chat in cui si trova il bot
-        const tutteLeChat = await client.getChats();
-        const gruppi = tutteLeChat.filter(chat => chat.isGroup);
-
-        message.reply(`🚀 Inizio il tag globale su ${gruppi.length} gruppi...`);
-
-        // 3. Ciclo per inviare il messaggio in ogni gruppo
-        for (const gruppo of gruppi) {
-            try {
-                // Prende gli ID di tutti i partecipanti per taggarli
-                const partecipanti = gruppo.participants.map(p => p.id._serialized);
-                
-                // Invia il messaggio con la "menzione" a tutti
-                await client.sendMessage(gruppo.id._serialized, `📢 *ANNUNCIO GLOBALE*\n\n${testoAnnuncio}`, {
-                    mentions: partecipanti
-                });
-
-                // Aspetta 3 secondi prima di passare al prossimo gruppo (SICUREZZA ANTIBAN)
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                
-            } catch (errore) {
-                console.log(`Impossibile inviare al gruppo: ${gruppo.name}`);
-            }
-        }
-
-        return message.reply("✅ Tag globale completato in tutti i gruppi!");
     }
+
+    m.reply('✅ Operazione completata!');
 };
+
+handler.help = ['globaltag'];
+handler.tags = ['owner']; // O la categoria che preferisci
+handler.command = /^(globaltag)$/i;
+handler.owner = true; // Solo tu puoi usarlo, per sicurezza
+
+export default handler;
