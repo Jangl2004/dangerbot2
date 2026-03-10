@@ -30,7 +30,7 @@ let handler = async (m, { conn }) => {
         
         await conn.sendMessage(m.chat, {
             text: text,
-            footer: 'System Cleanup',
+            footer: 'Pulizia del bot',
             buttons: [
                 { buttonId: '.ds', buttonText: { displayText: '🔄 Rifai DS' }, type: 1 }
             ],
