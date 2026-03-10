@@ -1,13 +1,15 @@
 import fs from 'fs'
 import path from 'path'
 
-let handler = async (m, { conn, setReply }) => {
-    // Specifica il nome della cartella dove il bot salva le sessioni
-    // Di solito in questi bot è './sessions' o './session'
-    const sessionPath = './sessions' 
+let handler = async (m, { conn }) => {
+    // Lista delle cartelle sessioni più comuni nei bot Baileys/VareBot
+    const possibiliCartelle = ['./session', './sessions', './auth_info_baileys', './auth_info', './sessione']
+    
+    // Trova la prima cartella esistente nella lista
+    let sessionPath = possibiliCartelle.find(p => fs.existsSync(p))
 
-    if (!fs.existsSync(sessionPath)) {
-        return m.reply('❌ Cartella sessioni non trovata.')
+    if (!sessionPath) {
+        return m.reply('❌ Errore: Non ho trovato nessuna cartella di sessione (ho cercato session, sessions, auth_info_baileys). Controlla il nome della cartella nel tuo file manager.')
     }
 
     try {
@@ -15,24 +17,34 @@ let handler = async (m, { conn, setReply }) => {
         let deletedCount = 0
 
         for (const file of files) {
-            // MOLTO IMPORTANTE: Non cancellare creds.json o il bot si disconnette
+            // Fondamentale: NON eliminare creds.json o il bot si disconnette
             if (file !== 'creds.json') {
-                await fs.promises.unlink(path.join(sessionPath, file))
-                deletedCount++
+                const filePath = path.join(sessionPath, file)
+                const stat = await fs.promises.stat(filePath)
+                
+                // Elimina solo i file, non le sottocartelle
+                if (stat.isFile()) {
+                    await fs.promises.unlink(filePath)
+                    deletedCount++
+                }
             }
         }
 
-        m.reply(`✅ Pulizia completata! Sono stati rimossi **${deletedCount}** file "sporchi".\nLe credenziali di accesso sono state mantenute al sicuro.`)
+        if (deletedCount === 0) {
+            return m.reply(`✨ La cartella *${sessionPath}* è già pulita! Non c'erano file inutili da rimuovere.`)
+        }
+
+        m.reply(`✅ Pulizia completata nella cartella: *${sessionPath}*\n\nEliminati **${deletedCount}** file di sessione "sporchi".\nIl file *creds.json* è stato salvato.`)
+        
     } catch (err) {
         console.error(err)
-        m.reply('❌ Si è verificato un errore durante la pulizia.')
+        m.reply('❌ Si è verificato un errore durante la pulizia dei file.')
     }
 }
 
-// Configurazione del comando
 handler.help = ['ds']
 handler.tags = ['owner']
 handler.command = /^(ds|cleansession)$/i
-handler.owner = true // Solo tu (il proprietario) puoi usarlo
+handler.owner = true // Solo il proprietario può usarlo
 
 export default handler
