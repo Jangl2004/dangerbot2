@@ -10,7 +10,7 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}addmod 🛡️ Nomina moderatore
 ➤ ${usedPrefix}delmod 🩸 Rimuovi moderatore
 ➤ ${usedPrefix}resetmod 🗑️ Reset completo moderatori
-
+➤ ${usedPrefix}blacklist 
 ════════════════════
 🤖 𝐂𝐎𝐍𝐓𝐑𝐎𝐋𝐋𝐎 𝐁𝐎𝐓
 ➤ ${usedPrefix}join + link 🚪 Forza ingresso bot
@@ -18,14 +18,13 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
 ➤ ${usedPrefix}getid (link gp) 🆔 Ottieni ID gruppo
 ➤ ${usedPrefix}out 🚷 Espelli bot dal gruppo
 ➤ ${usedPrefix}aggiorna 🌐 Aggiorna sistema
-
 ════════════════════
 📡 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈 𝐄𝐒𝐂𝐋𝐔𝐒𝐈𝐕𝐄
-➤ ${usedPrefix}bigtag 📢 Tag globale
+➤ ${usedPrefix}bigtag 📢 Grande tag
 ➤ ${usedPrefix}off 🌙 Modalità AFK
 ➤ ${usedPrefix}on ☀️ Disattiva AFK
 ➤ ${usedPrefix}getpl 📂 Ottieni plugin
-
+➤ ${usedPrefix}globaltag 🌍 Tag globale
 ════════════════════
  Autorità massima attiva
 `.trim();
