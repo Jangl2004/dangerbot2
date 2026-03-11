@@ -1,59 +1,79 @@
 import { createCanvas, loadImage } from 'canvas';
 
-// --- MANTENIAMO TUTTE LE TUE FUNZIONI GRAFICHE E DI LOGICA ---
-// (Includi qui: TrisGame, getSafeName, updatePlayerStats, 
-// createPlaceholderImage, drawX, drawO, renderBoard, sendGameMessage, ecc.)
-// ... [Il tuo codice precedente da riga 1 a 380 circa] ...
+// --- DEFINIZIONE GLOBALE (Per evitare il ReferenceError) ---
+global.games = global.games || new Map();
+global.timeoutMap = global.timeoutMap || new Map();
+global.playerStats = global.playerStats || new Map();
 
-// --- VERSIONE CORRETTA DELL'HANDLER ---
+// --- LOGICA DI GIOCO (Mantenuta come l'originale) ---
+class TrisGame {
+    constructor(p1, p2) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.board = Array(9).fill(null);
+        this.turn = p1;
+        this.isFinished = false;
+        this.winningLine = null;
+    }
+    move(pos) {
+        if (pos < 0 || pos > 8 || this.board[pos] || this.isFinished) return false;
+        this.board[pos] = this.turn === this.p1 ? 'X' : 'O';
+        this.turn = this.turn === this.p1 ? this.p2 : this.p1;
+        return true;
+    }
+    checkWin() {
+        const winPatterns = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        for (let pattern of winPatterns) {
+            const [a, b, c] = pattern;
+            if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) return { winner: this.board[a], line: pattern };
+        }
+        return !this.board.includes(null) ? { winner: 'draw', line: null } : null;
+    }
+}
+
+// ... [Inserisci qui le tue funzioni grafiche esistenti: renderBoard, drawX, drawO, sendGameMessage, ecc.] ...
+// Assicurati che sendGameMessage usi global.games invece di games locale!
+
 let handler = async (m, { conn }) => {
-    const { chat, sender, mentionedJid, quoted, text } = m;
+    const { chat, sender, mentionedJid, quoted } = m;
     
-    // Se è un tentativo di giocare una mossa (numero 1-9) in un gruppo dove c'è una partita
-    if (games.has(chat) && /^[1-9]$/.test(text?.trim())) {
-        return; // Lasciamo che sia il 'before' a gestire la mossa
-    }
+    // Comando .tris
+    if (!m.text.startsWith('.tris')) return;
+    
+    let opponent = mentionedJid[0] || quoted?.sender;
+    if (!opponent) return m.reply('❌ Menziona qualcuno per sfidarlo!');
+    if (opponent === sender) return m.reply('❌ Non puoi sfidare te stesso!');
+    if (global.games.has(chat)) return m.reply('⚠️ Partita già in corso.');
 
-    // Se è il comando .tris
-    if (text?.startsWith('.tris')) {
-        let opponent = mentionedJid?.[0] || quoted?.sender;
-        if (!opponent) return m.reply('❌ *Menziona qualcuno o rispondi a un messaggio per sfidare!*');
-        if (opponent === sender) return m.reply('❌ *Non puoi sfidare te stesso!*');
-        if (games.has(chat)) return m.reply('⚠️ *Partita già in corso!*');
-
-        const game = new TrisGame(sender, opponent);
-        games.set(chat, game);
-        await sendGameMessage(conn, chat, game, `🔄 Turno di: ${await getSafeName(conn, sender)}`, true);
-        return;
-    }
+    const game = new TrisGame(sender, opponent);
+    global.games.set(chat, game);
+    await sendGameMessage(conn, chat, game, `🔄 Turno di: @${sender.split('@')[0]}`, true);
 };
 
-// --- IL "CUORE" CORRETTO ---
+// --- HANDLER BEFORE (Intercettatore) ---
 handler.before = async (m, { conn }) => {
     const { chat, sender, text, isButtonResponse } = m;
-    if (!games.has(chat)) return;
+    if (!global.games.has(chat)) return;
 
-    const game = games.get(chat);
+    const game = global.games.get(chat);
     if (sender !== game.turn || game.isFinished) return;
 
     let pos;
-    // Intercettazione flessibile: accetta bottoni OPPURE numeri scritti in chat
     if (isButtonResponse) {
-        const buttonId = m.buttonId;
-        if (buttonId?.startsWith('tris_move_')) {
-            pos = parseInt(buttonId.replace('tris_move_', '')) - 1;
-        }
+        pos = parseInt(m.buttonId.replace('tris_move_', '')) - 1;
     } else if (/^[1-9]$/.test(text?.trim())) {
         pos = parseInt(text.trim()) - 1;
-    } else {
-        return;
-    }
+    } else return;
 
-    // Esecuzione mossa
-    if (pos !== undefined && game.move(pos)) {
-        let result = game.checkWin();
-        // ... [Qui mantieni tutta la tua logica di checkWin e invio messaggi finale] ...
-        // Assicurati di chiamare sendGameMessage dopo ogni mossa valida
+    if (!game.move(pos)) return m.reply('❌ Mossa non valida!');
+
+    let result = game.checkWin();
+    if (result) {
+        game.isFinished = true;
+        // ... (Logica finale che avevi) ...
+        global.games.delete(chat);
+    } else {
+        await sendGameMessage(conn, chat, game, `🔄 Turno di: @${game.turn.split('@')[0]}`);
     }
 };
 
