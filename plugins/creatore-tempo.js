@@ -1,34 +1,28 @@
-let userStats = {}; // In un bot reale, questo andrebbe salvato su un database JSON
-
-const handler = async (m, { conn }) => {
-    const userId = m.sender;
-    const chat = m.chat;
-    const now = Date.now();
-
-    // Inizializzazione dati
-    if (!userStats[chat]) userStats[chat] = {};
-    if (!userStats[chat][userId]) {
-        userStats[chat][userId] = { firstSeen: now, lastSeen: now, totalTime: 0 };
+let handler = async (m, { conn }) => {
+    // 1. Puntiamo allo stesso percorso del database di toptime
+    const today = getTodayKey(); // Assicurati di avere questa funzione uguale a toptime
+    if (!global.db.data.toptimeDaily?.days[today]?.chats[m.chat]?.[m.sender]) {
+        return conn.reply(m.chat, "Nessun tempo registrato ancora.", m);
     }
 
-    // Aggiornamento
-    let user = userStats[chat][userId];
-    user.lastSeen = now;
-    user.totalTime = user.lastSeen - user.firstSeen;
+    // 2. Leggiamo lo stesso valore che usa toptime
+    const data = global.db.data.toptimeDaily.days[today].chats[m.chat][m.sender];
+    const timeMs = data.time || 0;
 
-    if (m.text.startsWith('.tempo')) {
-        const totalSeconds = Math.floor(user.totalTime / 1000);
-        const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-        const m_ = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-        const s = (totalSeconds % 60).toString().padStart(2, '0');
+    // 3. Formattazione
+    const h = Math.floor(timeMs / 3600000);
+    const m_ = Math.floor((timeMs % 3600000) / 60000);
+    const s = Math.floor((timeMs % 60000) / 1000);
 
-        let caption = `🕒 *Tempo Online Oggi*\n`;
-        caption += `👤 @${userId.split('@')[0]}\n`;
-        caption += `⏱️ *${h}:${m_}:${s}*`;
+    let caption = `🕒 *Tempo Online Oggi*\n`;
+    caption += `👤 @${m.sender.split('@')[0]}\n`;
+    caption += `⏱️ *${h}h ${m_}m ${s}s*`;
 
-        await conn.sendMessage(chat, { text: caption, mentions: [userId] }, { quoted: m });
-    }
-};
+    await conn.sendMessage(m.chat, { text: caption, mentions: [m.sender] }, { quoted: m });
+}
 
-handler.command = /^(tempo)$/i; // Riconosce il comando .tempo
+handler.command = /^(tempo)$/i;
 export default handler;
+
+// Inserisci qui le funzioni di supporto (getTodayKey, ecc.) 
+// se non vengono importate automaticamente dal tuo bot.
