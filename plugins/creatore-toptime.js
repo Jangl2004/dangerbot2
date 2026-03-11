@@ -8,16 +8,18 @@ let handler = async (m, { conn }) => {
     initDay(today)
 
     const chatData = global.db.data.toptimeDaily.days[today].chats[m.chat] || {}
+    
+    // Ordiniamo i dati per tempo
     const top = Object.entries(chatData)
         .sort((a, b) => b[1].time - a[1].time)
         .slice(0, 5)
 
     if (top.length === 0) return conn.reply(m.chat, "Nessun dato temporale registrato oggi.", m)
 
-    // Formattazione lista Top 5
+    // Formattazione
     const { text, mentions } = formatTopTimeText(top, today)
 
-    // Invio con bottone interattivo
+    // Invio con bottone
     await conn.sendMessage(m.chat, {
         text: text,
         mentions: mentions,
@@ -27,37 +29,45 @@ let handler = async (m, { conn }) => {
     }, { quoted: m })
 }
 
-// Gestore del comando bottone .top10
 handler.before = async function (m, { conn }) {
-    // 1. Logica di conteggio tempo (sempre attiva)
-    if (m.message && !m.isBaileys && !m.fromMe && m.isGroup) {
+    try {
+        if (!m.message || m.isBaileys || m.fromMe || !m.isGroup) return
+
         const today = getTodayKey()
         initDay(today)
-        const chatData = global.db.data.toptimeDaily.days[today].chats[m.chat]
-        const now = Date.now()
-        const lastActive = chatData[m.sender]?.lastSeen || now
-        const diff = Math.min(now - lastActive, 300000)
-        chatData[m.sender] = {
-            time: (chatData[m.sender]?.time || 0) + (diff > 0 ? diff : 0),
-            lastSeen: now
+
+        const dayObj = global.db.data.toptimeDaily.days[today]
+        if (!dayObj.chats[m.chat]) dayObj.chats[m.chat] = {}
+        
+        // --- FIX PER L'ERRORE NEL TERMINALE ---
+        if (!dayObj.chats[m.chat][m.sender]) {
+            dayObj.chats[m.chat][m.sender] = { time: 0, lastSeen: Date.now() }
         }
-    }
+        
+        const chatData = dayObj.chats[m.chat][m.sender]
+        const now = Date.now()
+        const diff = Math.min(now - chatData.lastSeen, 300000) 
+        
+        chatData.time += (diff > 0 ? diff : 0)
+        chatData.lastSeen = now
+        // --------------------------------------
 
-    // 2. Risposta al bottone .top10
-    if (m.text === '.top10' || m.message?.buttonsResponseMessage?.selectedButtonId === '.top10') {
-        const today = getTodayKey()
-        const chatData = global.db.data.toptimeDaily.days[today].chats[m.chat] || {}
-        const top10 = Object.entries(chatData)
-            .sort((a, b) => b[1].time - a[1].time)
-            .slice(0, 10)
+        // Risposta al bottone
+        if (m.text === '.top10' || m.message?.buttonsResponseMessage?.selectedButtonId === '.top10') {
+            const top10 = Object.entries(dayObj.chats[m.chat])
+                .sort((a, b) => b[1].time - a[1].time)
+                .slice(0, 10)
 
-        let text = "🏆 *TOP 10 ATTIVITÀ (TEMPO) OGGI*\n\n"
-        top10.forEach((u, i) => {
-            const h = Math.floor(u[1].time / 3600000)
-            const m_ = Math.floor((u[1].time % 3600000) / 60000)
-            text += `${i + 1}. @${u[0].split('@')[0]} — *${h}h ${m_}m*\n`
-        })
-        await conn.sendMessage(m.chat, { text, mentions: top10.map(u => u[0]) }, { quoted: m })
+            let text = "🏆 *TOP 10 ATTIVITÀ (TEMPO) OGGI*\n\n"
+            top10.forEach((u, i) => {
+                const h = Math.floor(u[1].time / 3600000)
+                const m_ = Math.floor((u[1].time % 3600000) / 60000)
+                text += `${i + 1}. @${u[0].split('@')[0]} — *${h}h ${m_}m*\n`
+            })
+            await conn.sendMessage(m.chat, { text, mentions: top10.map(u => u[0]) }, { quoted: m })
+        }
+    } catch (e) {
+        console.error("Errore toptime.before:", e)
     }
 }
 
