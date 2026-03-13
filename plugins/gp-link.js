@@ -1,57 +1,40 @@
-const handler = async (m, { conn }) => {
-  if (!m.isGroup) return m.reply('⚠️ Questo comando funziona solo nei gruppi.');
+const handler = async (m, { conn, usedPrefix }) => {
+  if (!m.isGroup) return m.reply('☠️ Questo comando funziona solo nei gruppi.');
 
-  // 1. Recupero info del gruppo
+  // Metadata del gruppo
   const metadata = await conn.groupMetadata(m.chat);
-  const groupName = metadata.subject;
   const participants = metadata.participants || [];
-  
-  const totalMembers = participants.length;
   const totalAdmins = participants.filter(p => p.admin).length;
+  const totalMembers = participants.length;
 
-  // 2. Recupero link d'invito
+  // Recupero link
   let inviteCode;
   try {
     inviteCode = await conn.groupInviteCode(m.chat);
   } catch {
-    return m.reply('⚠️ Errore: Il bot deve essere Amministratore per prendere il link.');
+    return m.reply('⚠️ Errore: Assicurati che il bot sia Admin.');
   }
+  const groupLink = 'https://chat.whatsapp.com/' + inviteCode;
 
-  const groupLink = `https://chat.whatsapp.com/${inviteCode}`;
-
-  // 3. Testo del messaggio
-  const caption = `
-*${groupName}*
-
-👥 Membri: ${totalMembers}
-🛡️ Admin: ${totalAdmins}
+  // Testo estetico
+  const textMsg = `
+*CHЯΘMΞ HΣΔRTS* ʳⁱˢⁱⁿᵍ ☪︎𐦔
+━━━━━━━━━━━━━━
+👥 *𝙈𝙚𝙢𝙗𝙧𝙞:* ${totalMembers}
+🛡️ *𝘼𝙙𝙢𝙞𝙣:* ${totalAdmins}
+🔗 *𝙇𝙞𝙣𝙠:* ${groupLink}
+━━━━━━━━━━━━━━
+_Tieni premuto sul link per copiarlo._
 `.trim();
 
-  // 4. Creazione del messaggio interattivo con bottone VERO di copia (cta_copy)
-  const message = {
-    viewOnce: true,
-    text: caption,
-    footer: 'Link System',
-    nativeFlowMessage: {
-      buttons: [
-        {
-          name: "cta_copy",
-          buttonParamsJson: JSON.stringify({
-            display_text: "📑 Copia Link",
-            copy_code: groupLink
-          })
-        }
-      ]
-    }
-  };
-
-  // 5. Invio tramite relayMessage (necessario per i bottoni nativi)
-  return await conn.relayMessage(m.chat, {
-    viewOnceMessage: {
-      message: {
-        interactiveMessage: message
-      }
-    }
+  // Invio con la struttura che hai confermato funzionante
+  await conn.sendMessage(m.chat, {
+    text: textMsg,
+    footer: "🚀 𝘾𝙝𝙧𝙤𝙢𝙚 𝘽𝙤𝙩 𝙎𝙮𝙨𝙩𝙚𝙢",
+    buttons: [
+      { buttonId: "copy", buttonText: { displayText: "📑 𝘾𝙤𝙥𝙞𝙖 𝙇𝙞𝙣𝙠" }, type: 1 }
+    ],
+    headerType: 1
   }, { quoted: m });
 };
 
