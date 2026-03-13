@@ -3,40 +3,45 @@ const handler = async (m, { conn, usedPrefix }) => {
 
   // Metadata del gruppo
   const metadata = await conn.groupMetadata(m.chat);
-  const participants = metadata.participants || [];
-  const totalAdmins = participants.filter(p => p.admin).length;
-  const totalMembers = participants.length;
+  const totalAdmins = metadata.participants.filter(p => p.admin).length;
+  const totalMembers = metadata.participants.length;
 
-  // Recupero link
+  // Recupero link (lo usiamo per il bottone, non nel testo)
   let inviteCode;
   try {
     inviteCode = await conn.groupInviteCode(m.chat);
   } catch {
-    return m.reply('⚠️ Errore: Assicurati che il bot sia Admin.');
+    return m.reply('⚠️ Errore: Il bot deve essere Admin.');
   }
   const groupLink = 'https://chat.whatsapp.com/' + inviteCode;
 
-  // Testo estetico
+  // Testo senza il link
   const textMsg = `
 *CHЯΘMΞ HΣΔRTS* ʳⁱˢⁱⁿᵍ ☪︎𐦔
 ━━━━━━━━━━━━━━
 👥 *𝙈𝙚𝙢𝙗𝙧𝙞:* ${totalMembers}
 🛡️ *𝘼𝙙𝙢𝙞𝙣:* ${totalAdmins}
-🔗 *𝙇𝙞𝙣𝙠:* ${groupLink}
 ━━━━━━━━━━━━━━
-_Tieni premuto sul link per copiarlo._
+_Clicca il bottone sotto per ottenere il link._
 `.trim();
 
-  // Invio con la struttura che hai confermato funzionante
+  // Bottone che quando premuto invia il comando interno ".getlink"
   await conn.sendMessage(m.chat, {
     text: textMsg,
     footer: "🚀 𝘾𝙝𝙧𝙤𝙢𝙚 𝘽𝙤𝙩 𝙎𝙮𝙨𝙩𝙚𝙢",
     buttons: [
-      { buttonId: "copy", buttonText: { displayText: "📑 𝘾𝙤𝙥𝙞𝙖 𝙇𝙞𝙣𝙠" }, type: 1 }
+      { buttonId: `.getlink ${groupLink}`, buttonText: { displayText: "📑 𝘾𝙤𝙥𝙞𝙖 𝙇𝙞𝙣𝙠" }, type: 1 }
     ],
     headerType: 1
   }, { quoted: m });
 };
+
+// Questo piccolo handler serve per far apparire il link quando clicchi il bottone
+const subHandler = async (m, { text }) => {
+  if (!text) return;
+  await m.reply(text); // Risponde col link in chiaro, così puoi copiarlo
+};
+subHandler.command = /^getlink$/i;
 
 handler.help = ['link'];
 handler.tags = ['group'];
