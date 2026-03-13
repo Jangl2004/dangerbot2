@@ -3,24 +3,26 @@ const handler = async (m, { conn }) => {
   try {
     inviteCode = await conn.groupInviteCode(m.chat);
   } catch {
-    return m.reply('⚠️ Errore: Il bot deve essere amministratore del gruppo.');
+    return m.reply('⚠️ Errore: Il bot deve essere amministratore.');
   }
 
   const groupLink = `https://chat.whatsapp.com/${inviteCode}`;
 
-  // Creiamo un formato molto pulito che invita all'azione
   const caption = `
 *CHЯΘMΞ HΣΔRTS* ʳⁱˢⁱⁿᵍ ☪︎𐦔
 
-🔗 *LINK GRUPPO:*
-${groupLink}
-
-_Tieni premuto il link per copiarlo._
+Il link del gruppo è stato generato.
+Clicca sul bottone sotto per visualizzarlo.
 `.trim();
 
-  // Usiamo un sendMessage semplice ma formattato
-  return await conn.sendMessage(m.chat, {
-    text: caption
+  // Usiamo i Bottoni classici (molto più compatibili)
+  await conn.sendMessage(m.chat, {
+    text: caption,
+    footer: 'Chrome Bot System',
+    buttons: [
+      { buttonId: 'link_info', buttonText: { displayText: '🔗 Mostra Link' }, type: 1 }
+    ],
+    headerType: 1
   }, { quoted: m });
 };
 
