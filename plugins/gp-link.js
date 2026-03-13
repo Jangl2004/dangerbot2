@@ -2,21 +2,19 @@ const handler = async (m, { conn }) => {
     let inviteCode = await conn.groupInviteCode(m.chat);
     let groupLink = 'https://chat.whatsapp.com/' + inviteCode;
 
-    const templateMessage = {
-        text: `*CHЯΘMΞ HΣΔRTS* ʳⁱˢⁱⁿᵍ ☪︎𐦔\n\nLink generato correttamente.`,
-        contextInfo: {
-            externalAdReply: {
-                title: "CLICCA QUI PER COPIARE IL LINK",
-                body: "Chrome Bot System",
-                thumbnailUrl: "https://telegra.ph/file/a8523359d9976722e0e98.jpg", // Metti qui il tuo logo
-                sourceUrl: groupLink,
-                mediaType: 1,
-                renderLargerThumbnail: true
-            }
-        }
-    };
+    // Usiamo il blocco di codice per dare quell'aspetto "hacker/bot" che cercavi
+    let caption = `
+╔══════════════════════╗
+   *CHЯΘMΞ HΣΔRTS* ʳⁱˢⁱⁿᵍ ☪︎𐦔
+╚══════════════════════╝
 
-    await conn.sendMessage(m.chat, templateMessage, { quoted: m });
+🔗 LINK DI ACCESSO:
+${groupLink}
+
+_Tieni premuto il link per copiarlo._
+`.trim();
+
+    await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
 };
 
 handler.help = ['link'];
