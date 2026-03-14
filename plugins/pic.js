@@ -37,6 +37,6 @@ let handler = async (m, { conn, text }) => {
 handler.help = ['pfp [@tag|reply|numero]'];
 handler.tags = ['gruppo'];
 handler.command = ['pfp', 'fotoprofilo', 'pic'];
-handler.admin = true;
+handler.admin = false; // <--- Modificato qui (tutti possono usarlo)
 
 export default handler;
