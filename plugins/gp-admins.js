@@ -7,16 +7,8 @@ const handler = async (m, { conn, args }) => {
   const participants = metadata.participants
   const admins = participants.filter(p => p.admin)
 
-  // Creazione lista tag pulita
-  let adminMentions = ''
-  for (let admin of admins) {
-    // Usiamo il pushname se disponibile, altrimenti il nome registrato, altrimenti nulla
-    let name = conn.getName(admin.id) || ''
-    // Se il nome è uguale al numero (succede se non è in rubrica), lo lasciamo vuoto per non fare doppioni
-    let displayName = (name && !name.includes('@')) ? ` (${name})` : ''
-    
-    adminMentions += `⚔️ @${admin.id.split('@')[0]}${displayName}\n`
-  }
+  // Crea la lista usando solo il formato @numero che WhatsApp trasforma in "Nome Verde"
+  const adminMentions = admins.map(a => `⚔️ @${a.id.split('@')[0]}`).join('\n')
 
   const ritualMsg = args.length 
     ? `📜 𝕄𝔼𝕊𝕊𝔸𝔾𝔾𝕀𝕆: ${args.join(' ')}` 
@@ -31,7 +23,7 @@ ${adminMentions}
 
   await conn.sendMessage(m.chat, {
     text,
-    mentions: admins.map(a => a.id)
+    mentions: admins.map(a => a.id) // Questo è fondamentale per farli diventare verdi
   }, { quoted: m })
 }
 
