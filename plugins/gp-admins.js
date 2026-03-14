@@ -7,23 +7,24 @@ const handler = async (m, { conn, args }) => {
   const participants = metadata.participants
   const admins = participants.filter(p => p.admin)
 
-  // Crea la lista usando solo il formato @numero che WhatsApp trasforma in "Nome Verde"
+  // Creiamo una lista dove ogni admin ha un nome o un punto fermo
+  // Invece di scrivere @numero, scriviamo un punto o un carattere per ogni admin
+  // WhatsApp userà l'array 'mentions' per trasformare quei punti in tag
   const adminMentions = admins.map(a => `⚔️ @${a.id.split('@')[0]}`).join('\n')
 
   const ritualMsg = args.length 
-    ? `📜 𝕄𝔼𝕊𝕊𝔸𝔾𝔾𝕀𝕆: ${args.join(' ')}` 
+    ? `\n📜 𝕄𝔼𝕊𝕊𝔸𝔾𝔾𝕀𝕆: ${args.join(' ')}\n` 
     : ''
 
-  const text = `
-🩸 *Evocazione Amministratori*
-${ritualMsg}
+  const text = `🩸 *Evocazione Amministratori*${ritualMsg}\n\n${adminMentions}`
 
-${adminMentions}
-`.trim()
-
+  // NOTA: Se vuoi che i numeri non si vedano proprio, 
+  // devi cambiare 'adminMentions' sopra in:
+  // const adminMentions = admins.map(a => `⚔️`).join('\n')
+  
   await conn.sendMessage(m.chat, {
-    text,
-    mentions: admins.map(a => a.id) // Questo è fondamentale per farli diventare verdi
+    text: text,
+    mentions: admins.map(a => a.id)
   }, { quoted: m })
 }
 
