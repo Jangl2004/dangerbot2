@@ -8,10 +8,15 @@ const handler = async (m, { conn, args }) => {
 
   const admins = participants.filter(p => p.admin)
 
-  // crea lista tag
-  const adminMentions = admins.map(a => `@${a.id.split('@')[0]}`).join('\n')
+  // FIX: Otteniamo i nomi invece dei semplici numeri per la lista visibile
+  let adminMentions = ''
+  for (let admin of admins) {
+    // Prova a prendere il nome registrato, altrimenti usa il pushname o il numero
+    let name = conn.getName(admin.id)
+    adminMentions += ` @${admin.id.split('@')[0]} (${name})\n`
+  }
 
-  // costruisci messaggio
+  // Costruisci messaggio
   const ritualMsg = args.length 
     ? `📜 𝕄𝔼𝕊𝕊𝔸𝔾𝔾𝕀𝕆: ${args.join(' ')}` 
     : ''
