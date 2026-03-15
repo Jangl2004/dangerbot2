@@ -1,42 +1,26 @@
-let handler = async (m, { conn, text }) => {
-  try {
-    let who;
+client.on('message', async (msg) => {
+    const chat = await msg.getChat();
 
-    if (text && /^\d{7,15}$/.test(text)) {
-      who = text.replace(/\D/g, '') + '@s.whatsapp.net';
-    } else if (m.quoted) {
-      who = m.quoted.sender;
-    } else if (m.mentionedJid && m.mentionedJid.length > 0) {
-      who = m.mentionedJid[0];
-    } else {
-      who = m.fromMe ? conn.user.jid : m.sender;
-    }
+    // Controlla se è un comando
+    if (msg.body.startsWith('.admins ')) {
+        // Verifica che sia un gruppo
+        if (!chat.isGroup) {
+            return msg.reply('Questo comando funziona solo nei gruppi!');
+        }
 
-    let name = await conn.getName(who);
+        const args = msg.body.slice(8).trim(); // Prende il testo dopo ".admins "
+        const admins = chat.participants.filter(p => p.isAdmin || p.isSuperAdmin);
 
-    let pp;
-    try {
-      pp = await conn.profilePictureUrl(who, 'image');
-    } catch {
-      pp = null;
-    }
+        let mentionText = `📢 *Richiesta Admin:*\n${args}\n\n`;
+        let mentions = [];
 
-    if (!pp) {
-      await conn.reply(m.chat, `『 🚫 』 *${name} non ha una foto profilo.*`, m, fake);
-      return;
-    }
+        // Crea la lista delle menzioni
+        for (let admin of admins) {
+            mentionText += `@${admin.id.user} `;
+            mentions.push(admin.id._serialized);
+        }
 
-    await conn.sendFile(m.chat, pp, 'profile.jpg', `『 🖼️ 』 *Foto profilo di ${name}*`, m);
-
-  } catch (err) {
-    console.error('Errore nel comando .pfp:', err);
-    await conn.reply(m.chat, `${global.errore}`, m);
-  }
-};
-
-handler.help = ['pfp [@tag|reply|numero]'];
-handler.tags = ['gruppo'];
-handler.command = ['pfp', 'fotoprofilo', 'pic'];
-handler.admin = true;
-
-export default handler;
+        // Invia il messaggio con le menzioni
+        await chat.sendMessage(mentionText, { mentions });
+    }
+});
