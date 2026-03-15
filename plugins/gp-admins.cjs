@@ -1,31 +1,36 @@
-// gp-admins.cjs
-const cooldowns = new Map();
+// Plugin standard per taggare gli admin
+module.exports = {
+    name: "admins",
+    description: "Tagga tutti gli amministratori del gruppo",
+    command: ".admins",
+    
+    execute: async (client, msg, args) => {
+        const chat = await msg.getChat();
+        
+        // Verifica se siamo in un gruppo
+        if (!chat.isGroup) {
+            return msg.reply('Questo comando funziona solo nei gruppi.');
+        }
 
-module.exports = async (client, msg) => {
-    if (!msg.body.startsWith('.admins')) return;
+        // Recupero partecipanti
+        const participants = await chat.participants;
+        const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
 
-    const chat = await msg.getChat();
-    if (!chat.isGroup) return;
+        if (admins.length === 0) {
+            return msg.reply('Nessun amministratore trovato.');
+        }
 
-    // Cooldown
-    if (cooldowns.has(chat.id._serialized)) {
-        if (Date.now() - cooldowns.get(chat.id._serialized) < 60000) return;
+        // Formattazione del testo
+        const text = args.join(" ") || "Richiesta assistenza admin";
+        let mentionText = `🔔 *Richiesta Admin:*\n${text}\n\n`;
+        let mentions = [];
+
+        for (let admin of admins) {
+            mentions.push(admin.id._serialized);
+            mentionText += `@${admin.id.user} `;
+        }
+
+        // Invio finale
+        await chat.sendMessage(mentionText, { mentions });
     }
-    cooldowns.set(chat.id._serialized, Date.now());
-
-    const participants = await chat.participants;
-    const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
-
-    if (admins.length === 0) return;
-
-    const text = msg.body.slice(7).trim();
-    let mentionText = `📢 *Richiesta Admin:*\n${text || 'Urgente!'}\n\n`;
-    let mentions = [];
-
-    admins.forEach(admin => {
-        mentions.push(admin.id._serialized);
-        mentionText += `@${admin.id.user} `;
-    });
-
-    await chat.sendMessage(mentionText, { mentions });
 };
