@@ -1,53 +1,46 @@
-/**
- * Plugin: .admins <testo>
- * Descrizione: Notifica tutti gli amministratori del gruppo.
- */
-
-const cooldowns = new Map(); // Per gestire l'anti-spam
-
 module.exports = async (client, msg) => {
-    const chat = await msg.getChat();
-    const command = ".admins";
-
-    // 1. Validazione base
-    if (!msg.body.startsWith(command)) return;
-    if (!chat.isGroup) return msg.reply('❌ Comando disponibile solo nei gruppi.');
-
-    // 2. Anti-Spam (1 minuto di cooldown)
-    const now = Date.now();
-    const cooldownTime = 60000;
-    if (cooldowns.has(chat.id._serialized)) {
-        const expiration = cooldowns.get(chat.id._serialized) + cooldownTime;
-        if (now < expiration) return; // Ignora in silenzio se è troppo presto
-    }
-    cooldowns.set(chat.id._serialized, now);
-
-    // 3. Estrazione testo e validazione
-    const text = msg.body.slice(command.length).trim();
-    if (!text) return msg.reply('⚠️ *Sintassi errata.*\nUsa: `.admins <il tuo messaggio>`');
+    // 1. Filtro rapido (non sprecare risorse)
+    if (!msg.body.startsWith('.admins')) return;
 
     try {
-        // 4. Recupero Admin
+        const chat = await msg.getChat();
+        
+        // 2. Verifica se è un gruppo
+        if (!chat.isGroup) {
+            return msg.reply('❌ Il comando funziona solo nei gruppi.');
+        }
+
+        // 3. RECUPERO FORZATO PARTECIPANTI
+        // A volte la cache è vuota, forziamo il refresh dal server
         const participants = await chat.participants;
+        
+        // Debug: vediamo cosa vede il bot
+        console.log(`[DEBUG] Trovati ${participants.length} partecipanti nel gruppo ${chat.name}`);
+
         const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
 
-        if (admins.length === 0) return msg.reply('❌ Non ho trovato admin in questo gruppo.');
+        if (admins.length === 0) {
+            return msg.reply('⚠️ Non ho trovato alcun amministratore (o non ho i permessi per vedere la lista).');
+        }
 
-        // 5. Creazione menzioni
-        let mentionText = `🔔 *Richiesta agli Admin*\n\n`;
-        mentionText += `📝 *Messaggio:* ${text}\n\n`;
+        // 4. Costruzione messaggio
+        const args = msg.body.slice(7).trim();
+        const responseText = args ? `📢 *Richiesta Admin:* ${args}` : '📢 *Richiesta urgente agli amministratori:*';
         
         let mentions = [];
+        let mentionText = `${responseText}\n\n`;
+
         admins.forEach(admin => {
-            mentionText += `@${admin.id.user} `;
             mentions.push(admin.id._serialized);
+            mentionText += `@${admin.id.user} `;
         });
 
-        // 6. Invio
+        // 5. Invio
         await chat.sendMessage(mentionText, { mentions });
-        
-    } catch (error) {
-        console.error('Errore nel plugin admins:', error);
-        msg.reply('⚠️ Si è verificato un errore durante l\'invio della notifica.');
+        console.log('[DEBUG] Messaggio inviato con successo');
+
+    } catch (err) {
+        console.error('[ERROR] Errore critico nel plugin:', err);
+        msg.reply('❌ Errore interno: impossibile recuperare gli admin.');
     }
 };
