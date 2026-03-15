@@ -1,46 +1,34 @@
-module.exports = async (client, msg) => {
-    // 1. Filtro rapido (non sprecare risorse)
+// Plugin: gp-admins.js (Sintassi ESM)
+const cooldowns = new Map();
+
+export default async function (client, msg) {
+    // 1. Verifica comando
     if (!msg.body.startsWith('.admins')) return;
 
-    try {
-        const chat = await msg.getChat();
-        
-        // 2. Verifica se è un gruppo
-        if (!chat.isGroup) {
-            return msg.reply('❌ Il comando funziona solo nei gruppi.');
-        }
+    const chat = await msg.getChat();
+    if (!chat.isGroup) return msg.reply('❌ Comando solo nei gruppi.');
 
-        // 3. RECUPERO FORZATO PARTECIPANTI
-        // A volte la cache è vuota, forziamo il refresh dal server
-        const participants = await chat.participants;
-        
-        // Debug: vediamo cosa vede il bot
-        console.log(`[DEBUG] Trovati ${participants.length} partecipanti nel gruppo ${chat.name}`);
-
-        const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
-
-        if (admins.length === 0) {
-            return msg.reply('⚠️ Non ho trovato alcun amministratore (o non ho i permessi per vedere la lista).');
-        }
-
-        // 4. Costruzione messaggio
-        const args = msg.body.slice(7).trim();
-        const responseText = args ? `📢 *Richiesta Admin:* ${args}` : '📢 *Richiesta urgente agli amministratori:*';
-        
-        let mentions = [];
-        let mentionText = `${responseText}\n\n`;
-
-        admins.forEach(admin => {
-            mentions.push(admin.id._serialized);
-            mentionText += `@${admin.id.user} `;
-        });
-
-        // 5. Invio
-        await chat.sendMessage(mentionText, { mentions });
-        console.log('[DEBUG] Messaggio inviato con successo');
-
-    } catch (err) {
-        console.error('[ERROR] Errore critico nel plugin:', err);
-        msg.reply('❌ Errore interno: impossibile recuperare gli admin.');
+    // 2. Cooldown (60 secondi)
+    if (cooldowns.has(chat.id._serialized)) {
+        if (Date.now() - cooldowns.get(chat.id._serialized) < 60000) return;
     }
-};
+    cooldowns.set(chat.id._serialized, Date.now());
+
+    // 3. Recupero Admin
+    const participants = await chat.participants;
+    const admins = participants.filter(p => p.isAdmin || p.isSuperAdmin);
+
+    if (admins.length === 0) return msg.reply('❌ Non ho trovato admin.');
+
+    // 4. Invio messaggio
+    const text = msg.body.slice(7).trim();
+    let mentionText = `📢 *Richiesta agli Admin:*\n${text || 'Nessun messaggio specificato'}\n\n`;
+    let mentions = [];
+
+    admins.forEach(admin => {
+        mentions.push(admin.id._serialized);
+        mentionText += `@${admin.id.user} `;
+    });
+
+    await chat.sendMessage(mentionText, { mentions });
+}
