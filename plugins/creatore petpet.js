@@ -29,7 +29,7 @@ let handler = async (m, { conn }) => {
     // Generazione GIF Pet-Pet con impostazioni bilanciate (Qualità/Peso)
     const gifBuffer = await petPet(imgBuffer, {
       resolution: 128, // Risoluzione ottimale per leggibilità senza pesare troppo
-      delay: 25,       // Velocità fluida che rispetta i limiti di invio di WhatsApp
+      delay: 15,       // Velocità fluida che rispetta i limiti di invio di WhatsApp
     })
 
     // Creazione dello sticker con parametri equilibrati
