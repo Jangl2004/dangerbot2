@@ -1,4 +1,4 @@
-// TOP // Plugin creato da Luxifer 
+// TOP // Plugin creato da Luxifer - Versione con Top 3 + Bottoni
 
 const TZ = "Europe/Rome"
 
@@ -9,33 +9,36 @@ let handler = async (m, { conn, args }) => {
   initDay(today)
 
   const chatData = global.db.data.topchatDaily.days[today].chats[m.chat] || {}
-
-  // Se non ci sono argomenti (es. scrivi solo .top), invia i bottoni
-  if (!args[0]) {
-    const buttons = [
-      { buttonId: '.top 5', buttonText: { displayText: 'Top 5' }, type: 1 },
-      { buttonId: '.top 10', buttonText: { displayText: 'Top 10' }, type: 1 }
-    ]
-
-    const buttonMessage = {
-      text: "Scegli la classifica di oggi:",
-      footer: "Plugin by Luxifer",
-      buttons: buttons,
-      headerType: 1
-    }
-
-    return await conn.sendMessage(m.chat, buttonMessage, { quoted: m })
+  
+  // Se l'utente clicca un bottone (es: .top 5 o .top 10)
+  if (args[0] === '5' || args[0] === '10') {
+    let limit = parseInt(args[0])
+    const top = getTopLimit(chatData, limit)
+    if (top.length === 0) return conn.reply(m.chat, "Nessun messaggio registrato.", m)
+    const { text, mentions } = formatTopText(top, today, limit)
+    return await conn.sendMessage(m.chat, { text, mentions }, { quoted: m })
   }
 
-  // Gestione della scelta (5 o 10)
-  let limit = args[0] === '10' ? 10 : 5
-  const top = getTopLimit(chatData, limit)
+  // Altrimenti, di default mostra la TOP 3 con i BOTTONI sotto
+  const top3 = getTopLimit(chatData, 3)
+  if (top3.length === 0) return conn.reply(m.chat, "Nessun messaggio registrato oggi.", m)
 
-  if (top.length === 0) return conn.reply(m.chat, "Nessun messaggio registrato oggi.", m)
+  const { text: top3Text, mentions } = formatTopText(top3, today, 3)
 
-  const { text, mentions } = formatTopText(top, today, conn, false, limit)
+  const buttons = [
+    { buttonId: '.top 5', buttonText: { displayText: '🏆 Visualizza Top 5' }, type: 1 },
+    { buttonId: '.top 10', buttonText: { displayText: '🏅 Visualizza Top 10' }, type: 1 }
+  ]
 
-  await conn.sendMessage(m.chat, { text, mentions }, { quoted: m })
+  const buttonMessage = {
+    text: top3Text,
+    footer: "Seleziona un bottone per espandere la classifica",
+    mentions: mentions,
+    buttons: buttons,
+    headerType: 1
+  }
+
+  await conn.sendMessage(m.chat, buttonMessage, { quoted: m })
 }
 
 handler.before = async function (m, { conn }) {
@@ -55,7 +58,7 @@ handler.before = async function (m, { conn }) {
       if (!dayObj.sent[m.chat]) {
         const top = getTopLimit(chatData, 5)
         if (top.length > 0) {
-          const { text, mentions } = formatTopText(top, today, conn, true, 5)
+          const { text, mentions } = formatTopText(top, today, 5, true)
           await conn.sendMessage(m.chat, { text, mentions })
         }
         dayObj.sent[m.chat] = true
@@ -82,54 +85,5 @@ function getTopLimit(chatData, limit) {
     .slice(0, limit)
 }
 
-function formatTopText(top, today, conn, isAuto = false, limit = 5) {
-  const medals = ["🥇", "🥈", "🥉", "🏅", "🎖", "👤", "👤", "👤", "👤", "👤"]
-  const mentions = top.map(([jid]) => jid)
-
-  let text = `${isAuto ? "⏰ *TOP 5 DI OGGI (AUTOMATICO)*" : `🏆 *TOP ${limit} ATTIVITÀ OGGI*`}\n`
-  text += `📅 ${today}\n\n`
-
-  for (let i = 0; i < top.length; i++) {
-    const [jid, count] = top[i]
-    const num = jid.split("@")[0]
-    text += `${medals[i] || "👤"} @${num} — ${count} messaggi\n`
-  }
-
-  text += `\n${isAuto ? "✅ Classifica inviata automaticamente alle 23:59." : ""}`.trimEnd()
-
-  return { text: text.trim(), mentions }
-}
-
-function getRomeNowParts() {
-  const parts = new Intl.DateTimeFormat("it-IT", {
-    timeZone: TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date())
-
-  const obj = {}
-  for (const p of parts) if (p.type !== "literal") obj[p.type] = p.value
-  return obj
-}
-
-function getTodayKey() {
-  const p = getRomeNowParts()
-  return `${p.year}-${p.month}-${p.day}`
-}
-
-function isNow2359() {
-  const p = getRomeNowParts()
-  return p.hour === "23" && p.minute === "59"
-}
-
-handler.help = ["top"]
-handler.tags = ["group"]
-handler.command = /^(top)$/i
-handler.group = true
-
-export default handler
+function formatTopText(top, today, limit, isAuto = false) {
+  const medals = ["🥇", "
