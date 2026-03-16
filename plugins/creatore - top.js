@@ -1,17 +1,30 @@
-// --- DEBUG TOTALE: Inseriscilo subito dopo la creazione del client ---
-
-client.on('message_create', (msg) => {
-    // Questo evento cattura TUTTI i messaggi, inclusi quelli inviati dal bot stesso
-    console.log(`[DEBUG EVENTO] Ricevuto messaggio da: ${msg.fromMe ? 'ME' : msg.author}`);
-    console.log(`[DEBUG EVENTO] Contenuto: ${msg.body}`);
-});
+const { List } = require('whatsapp-web.js');
 
 client.on('message', async msg => {
-    console.log(`[DEBUG EVENTO] Messaggio normale ricevuto: ${msg.body}`);
-    
-    // Proviamo a forzare la risposta a QUALSIASI messaggio per testare
-    if (msg.body === '.test') {
-        await msg.reply('Il bot funziona!');
-        console.log("[DEBUG] Test riuscito!");
+    // Comando .top
+    if (msg.body.trim().toLowerCase() === '.top') {
+        
+        // 1. Definiamo la lista dei bottoni (stile "Mostra Top 10")
+        const listaBottoni = new List(
+            '🏆 *TOP 5 ATTIVITÀ (MESSAGGI) OGGI*\n📅 2026-03-16\n\n1. Mario - 50 msg\n2. Luigi - 45 msg\n3. Peach - 40 msg\n4. Bowser - 35 msg\n5. Toad - 30 msg\n\nClicca sotto per la classifica estesa',
+            '📊 Mostra Top 10', // Testo del bottone principale
+            [{
+                title: 'Opzioni Classifica',
+                rows: [
+                    { title: 'Mostra Top 10', id: 'top10', description: 'Vedi i primi 10 membri' }
+                ]
+            }],
+            'Classifica Messaggi', // Titolo del menù
+            'Footer del Bot' // Testo in basso
+        );
+
+        await client.sendMessage(msg.from, listaBottoni);
+    }
+
+    // 2. Gestione al click del bottone "Mostra Top 10"
+    if (msg.type === 'list_response') {
+        if (msg.selectedRowId === 'top10') {
+            await msg.reply('📈 *Ecco la Top 10 estesa:* ... (qui metti la tua lista)');
+        }
     }
 });
