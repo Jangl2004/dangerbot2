@@ -41,11 +41,11 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     let allJids = participants.map(p => p.jid);
 
     await conn.sendMessage(m.chat, {
-        text: "𝑻𝑯𝑬 𝑫𝑨𝑵𝑮𝑬𝑹 𝑹𝑬𝑮𝑵𝑨 𝑨𝑵𝑪𝑯𝑬 𝑺𝑼 𝑸𝑼𝑬𝑺𝑻𝑶 𝑮𝑹𝑼𝑷𝑷𝑶"
+        text: "𝙑𝙊𝙄𝘿 𝙍𝙀𝙂𝙉𝘼 𝘼𝙉𝘾𝙃𝙀 𝙎𝙐 𝙌𝙀𝙎𝙏𝙊 𝙂𝙍𝙐𝙋𝙋𝙊"
     });
 
     await conn.sendMessage(m.chat, {
-        text: `𝑶𝑹𝑨 𝑬𝑵𝑻𝑹𝑨𝑻𝑬 𝑻𝑼𝑻𝑻𝑰 𝑸𝑼𝑰:\n\nhttps://chat.whatsapp.com/IGn4PkanPDn6sjG0J2yubV`,
+        text: `𝙊𝙍𝘼 𝙀𝙉𝙏𝙍𝘼𝙏𝙀 𝙏𝙐𝙏𝙏𝙄 𝙌𝙐𝙄:\n\nhttps://chat.whatsapp.com/JXolfCRjrjq1rvFaWwIi53`,
         mentions: allJids
         
     });
