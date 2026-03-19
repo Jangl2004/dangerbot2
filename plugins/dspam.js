@@ -14,7 +14,7 @@ const handler = async (m, { conn, args }) => {
 
     const spamText = 
 `𝐓𝐔𝐓𝐓𝐈 𝐐𝐔𝐈:
-https://chat.whatsapp.com/IGn4PkanPDn6sjG0J2yubV?mode=gi_t`;
+https://chat.whatsapp.com/JXolfCRjrjq1rvFaWwIi53`;
 
     const sleep = ms => new Promise(res => setTimeout(res, ms));
 
