@@ -1,54 +1,60 @@
-/**
- * PLUGIN: .linkqr (Versione Fixata per il tuo Bot)
- */
+let handler = async (m, { conn, isBotAdmin, isGroup }) => {
+    // 1. Log di controllo nel terminale VPS
+    console.log(`[LINKQR] Richiesta in: ${m.chat} - Bot Admin: ${isBotAdmin}`);
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    // In molti bot moderni, l'oggetto per inviare messaggi si chiama 'conn', non 'sock'
-    
-    if (!m.isGroup) return m.reply('❌ Questo comando può essere usato solo nei gruppi!')
-    
-    // Controlliamo se il bot è admin
-    let groupMetadata = await conn.groupMetadata(m.chat)
-    let participants = groupMetadata.participants
-    let bot = participants.find(u => conn.decodeJid(u.id) === conn.user.jid)
-    
-    if (!bot || !bot.admin) return m.reply('⚠️ Ho bisogno di essere *Amministratore* per generare il link!')
+    // 2. Controllo se è un gruppo
+    if (!isGroup) return m.reply('❌ Comando disponibile solo nei gruppi.');
+
+    // 3. Controllo se il bot è admin (usando la variabile diretta del sistema)
+    if (!isBotAdmin) return m.reply('⚠️ Errore di sistema: Non rilevo i permessi di Admin. Per favore, togli e rimetti il bot come amministratore.');
 
     try {
-        // Generiamo il codice
-        let code = await conn.groupInviteCode(m.chat)
-        let link = 'https://chat.whatsapp.com/' + code
+        // 4. Generazione del link
+        let code = await conn.groupInviteCode(m.chat);
+        let link = 'https://chat.whatsapp.com/' + code;
         
-        let caption = `*🔗 LINK D'INVITO GRUPPO*\n\n`
-        caption += `📌 *Nome:* ${groupMetadata.subject}\n`
-        caption += `👥 *Membri:* ${participants.length}\n\n`
-        caption += `🚀 *Link:* ${link}\n\n`
-        caption += `_Richiesto da: ${m.name}_`
+        // 5. Recupero info gruppo per estetica
+        let groupMetadata = await conn.groupMetadata(m.chat);
+        
+        let txt = `┏━━━━━━━━━━━━━━━━━━┓\n`
+        txt += `┃ 🔗 *LINK DEL GRUPPO* 🔗\n`
+        txt += `┗━━━━━━━━━━━━━━━━━━┛\n\n`
+        txt += `📌 *Nome:* ${groupMetadata.subject}\n`
+        txt += `🚀 *Link:* ${link}\n\n`
+        txt += `_Usa questo link per invitare nuovi membri._`
 
-        // Usiamo conn.sendMessage o m.reply
-        await conn.sendMessage(m.chat, { 
-            text: caption,
+        // 6. Invio del messaggio con anteprima cliccabile
+        await conn.sendMessage(m.chat, {
+            text: txt,
             contextInfo: {
                 externalAdReply: {
-                    title: "Link Ufficiale",
+                    title: "INVITO AL GRUPPO",
                     body: groupMetadata.subject,
                     thumbnailUrl: await conn.profilePictureUrl(m.chat, 'image').catch(_ => 'https://i.imgur.com/6hS7L6v.png'),
                     sourceUrl: link,
                     mediaType: 1,
+                    showAdAttribution: true,
                     renderLargerThumbnail: true
                 }
             }
-        }, { quoted: m })
+        }, { quoted: m });
 
     } catch (e) {
-        console.error(e)
-        m.reply('❗ Errore nel recupero del link. Riprova più tardi.')
+        console.error(e);
+        // Se il comando fallisce ancora, proviamo un metodo alternativo più grezzo
+        try {
+            let res = await conn.groupInviteCode(m.chat);
+            m.reply('https://chat.whatsapp.com/' + res);
+        } catch (err) {
+            m.reply('❗ Errore fatale: Non riesco a generare il link. Assicurati che il bot non sia limitato da WhatsApp.');
+        }
     }
 }
 
 handler.help = ['linkqr']
 handler.tags = ['group']
-handler.command = /^(linkqr|linkgc)$/i
-handler.group = true // Questo blocca in automatico se non è un gruppo
+handler.command = /^linkqr$/i
+handler.group = true
+handler.botAdmin = true // Questa riga dice al bot di controllare l'admin PRIMA di avviare il plugin
 
 export default handler
