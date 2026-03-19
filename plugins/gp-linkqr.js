@@ -1,5 +1,3 @@
-/
-
 const linkGroupPlugin = async (sock, m, isGroup, isAdmins, isBotAdmins) => {
     // 1. Identificazione del comando
     const prefix = '.'; 
