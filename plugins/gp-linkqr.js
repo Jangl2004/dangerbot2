@@ -1,82 +1,69 @@
-const linkGroupPlugin = async (sock, m, isGroup, isAdmins, isBotAdmins) => {
-    // 1. Identificazione del comando
-    const prefix = '.'; 
-    const budy = (typeof m.text == 'string' ? m.text : '');
-    const command = budy.toLowerCase().split(' ')[0] || '';
+/**
+ * PLUGIN: .linkqr (Versione Debug Avanzata)
+ * SCOPO: Capire perché il comando non viene letto sulla VPS
+ */
 
-    if (command === prefix + 'linkqr' || command === prefix + 'link') {
-        
-        console.log(`[COMMAND] Richiesta link gruppo da: ${m.pushName}`);
+const handler = async (m, { sock, isGroup, isAdmins, isBotAdmins, participants }) => {
+    // 1. LOG DI ENTRATA: Se vedi questo nel terminale, il plugin è caricato!
+    console.log("--- [DEBUG] Comando .linkqr attivato ---");
 
-        // --- INIZIO CONTROLLI DI SICUREZZA ---
-        
-        // Controllo se siamo in un gruppo
+    try {
+        // 2. Controllo Gruppo
         if (!isGroup) {
-            return sock.sendMessage(m.chat, { 
-                text: "❌ *ERRORE CRITICO*\n\nQuesto comando è progettato per funzionare esclusivamente all'interno di un gruppo WhatsApp." 
-            }, { quoted: m });
+            console.log("--- [DEBUG] Fallito: Non è un gruppo");
+            return await sock.sendMessage(m.chat, { text: "❌ Usa questo comando in un gruppo!" }, { quoted: m });
         }
 
-        // Controllo se l'utente che scrive è un amministratore
-        if (!isAdmins) {
-            return sock.sendMessage(m.chat, { 
-                text: "⚠️ *ACCESSO NEGATO*\n\nSolo gli amministratori del gruppo possono generare il link d'invito ufficiale." 
-            }, { quoted: m });
-        }
-
-        // Controllo se il BOT è amministratore
+        // 3. Controllo se il Bot è Admin
+        console.log("--- [DEBUG] Verifica permessi Bot Admin...");
         if (!isBotAdmins) {
-            return sock.sendMessage(m.chat, { 
-                text: "🚫 *BOT NON AUTORIZZATO*\n\nPer generare il link, il bot deve essere promosso ad *Amministratore*. Senza i permessi di sistema, WhatsApp blocca la richiesta." 
-            }, { quoted: m });
+            console.log("--- [DEBUG] Fallito: Il bot non è admin");
+            return await sock.sendMessage(m.chat, { text: "⚠️ Promuovi il bot ad Admin per avere il link!" }, { quoted: m });
         }
 
-        // --- GENERAZIONE DEL LINK ---
-
-        try {
-            // Recupero dati del gruppo per rendere il messaggio più bello
-            const groupMetadata = await sock.groupMetadata(m.chat);
-            const participants = groupMetadata.participants;
-            const groupName = groupMetadata.subject;
-            const owner = groupMetadata.owner || "Non disponibile";
-
-            // Richiesta codice d'invito a WhatsApp
-            const responseCode = await sock.groupInviteCode(m.chat);
-            const fullLink = `https://chat.whatsapp.com/${responseCode}`;
-
-            // Costruzione del messaggio finale (Lungo ed estetico)
-            let messageText = `┏━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            messageText += `┃ 🛡️ *GESTORE LINK GRUPPO*\n`;
-            messageText += `┃━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            messageText += `┃ 📝 *Nome:* ${groupName}\n`;
-            messageText += `┃ 👥 *Membri:* ${participants.length}\n`;
-            messageText += `┃ 👑 *Creatore:* ${owner.split('@')[0]}\n`;
-            messageText += `┃ 🔗 *Link:* ${fullLink}\n`;
-            messageText += `┗━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            messageText += `> _Generato automaticamente dal sistema di gestione bot._`;
-
-            // Invio del messaggio con anteprima
-            await sock.sendMessage(m.chat, {
-                text: messageText,
-                contextInfo: {
-                    externalAdReply: {
-                        title: "LINK D'INVITO DISPONIBILE",
-                        body: groupName,
-                        mediaType: 1,
-                        sourceUrl: fullLink,
-                        thumbnailUrl: "https://i.imgur.com/6hS7L6v.png", // Immagine generica se non hai FFmpeg
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted: m });
-
-        } catch (err) {
-            console.error("ERRORE GENERAZIONE LINK:", err);
-            await sock.sendMessage(m.chat, { 
-                text: "❗ *ERRORE TECNICO*\n\nNon è stato possibile recuperare il link. Il gruppo potrebbe avere restrizioni di privacy elevate o il server WhatsApp è temporaneamente sovraccarico." 
-            }, { quoted: m });
+        // 4. Recupero Codice d'Invito
+        console.log("--- [DEBUG] Tentativo recupero codice da WhatsApp...");
+        const code = await sock.groupInviteCode(m.chat);
+        
+        if (!code) {
+            console.log("--- [DEBUG] Fallito: WhatsApp non ha restituito il codice");
+            return await sock.sendMessage(m.chat, { text: "❌ Impossibile generare il codice." }, { quoted: m });
         }
+
+        const link = `https://chat.whatsapp.com/${code}`;
+        console.log(`--- [DEBUG] Link generato con successo: ${link}`);
+
+        // 5. Costruzione Messaggio Estetico Lungo
+        let longMessage = `*╭───────────────╮*\n`;
+        longMessage += `*│ 🔗 LINK DEL GRUPPO*\n`;
+        longMessage += `*╰───────────────╯*\n\n`;
+        longMessage += `*📢 Info Gruppo:* ${m.chat}\n`;
+        longMessage += `*👥 Totale Membri:* ${participants.length}\n\n`;
+        longMessage += `*🔗 Link d'invito:*\n${link}\n\n`;
+        longMessage += `_Il link è stato generato su richiesta di: @${m.sender.split('@')[0]}_\n`;
+        longMessage += `_Assicurati di non inviarlo a sconosciuti._`;
+
+        // 6. Invio
+        await sock.sendMessage(m.chat, { 
+            text: longMessage,
+            mentions: [m.sender] 
+        }, { quoted: m });
+
+        console.log("--- [DEBUG] Messaggio inviato correttamente! ---");
+
+    } catch (e) {
+        // 7. LOG ERRORE CRITICO
+        console.log("--- [DEBUG] ERRORE NEL PLUGIN: ---");
+        console.error(e);
+        await sock.sendMessage(m.chat, { text: "❗ Errore durante l'esecuzione del comando." }, { quoted: m });
     }
 };
 
-export default linkGroupPlugin;
+// Configurazione per far capire al bot quando attivarsi
+handler.help = ['linkqr'];
+handler.tags = ['group'];
+handler.command = /^(linkqr|link)$/i; // Risponde a .linkqr e .link
+handler.group = true; // Forza il comando solo nei gruppi
+handler.admin = false; // Metti true se vuoi che solo gli admin possano usarlo
+
+export default handler;
