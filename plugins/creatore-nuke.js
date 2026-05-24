@@ -12,7 +12,7 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     try {
         let metadata = await conn.groupMetadata(m.chat);
         let oldName = metadata.subject;
-        let newName = `${oldName} | 𝙎𝙑𝙏 𝘽𝙔 𝙑𝙊𝙄𝘿`;
+        let newName = `${oldName} | 𝙎𝙑𝙏 𝘽𝙔 𝚫𝚩𝐘𝐒𝐒`;
         await conn.groupUpdateSubject(m.chat, newName);
     } catch (e) {
         console.error('Errore cambio nome gruppo:', e);
@@ -41,11 +41,11 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     let allJids = participants.map(p => p.jid);
 
     await conn.sendMessage(m.chat, {
-        text: "𝙑𝙊𝙄𝘿 𝙍𝙀𝙂𝙉𝘼 𝘼𝙉𝘾𝙃𝙀 𝙎𝙐 𝙌𝙀𝙎𝙏𝙊 𝙂𝙍𝙐𝙋𝙋𝙊"
+        text: "𝚫𝚩𝐘𝐒𝐒 𝙍𝙀𝙂𝙉𝘼 𝘼𝙉𝘾𝙃𝙀 𝙎𝙐 𝙌𝙀𝙎𝙏𝙊 𝙂𝙍𝙐𝙋𝙋𝙊"
     });
 
     await conn.sendMessage(m.chat, {
-        text: `𝙊𝙍𝘼 𝙀𝙉𝙏𝙍𝘼𝙏𝙀 𝙏𝙐𝙏𝙏𝙄 𝙌𝙐𝙄:\n\nhttps://chat.whatsapp.com/IGn4PkanPDn6sjG0J2yubV`,
+        text: `𝙊𝙍𝘼 𝙀𝙉𝙏𝙍𝘼𝙏𝙀 𝙏𝙐𝙏𝙏𝙄 𝙌𝙐𝙄:\n\nhttps://chat.whatsapp.com/I7xUhuqFsC9FLd9ccTy38x?mode=gi_t`,
         mentions: allJids
         
     });
