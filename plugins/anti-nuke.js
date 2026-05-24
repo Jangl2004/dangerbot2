@@ -2,7 +2,7 @@ const handler = m => m;
 
 // Lista utenti autorizzati
 const registeredAdmins = [
-  '212781816909@s.whatsapp.net',
+  '393780560229@s.whatsapp.net',
   '390935931875@s.whatsapp.net',
 ];
 
