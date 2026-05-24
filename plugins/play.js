@@ -7,7 +7,7 @@ import path from 'path';
 import os from 'os';
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`⚡ *𝙋𝙡𝙖𝙮 𝘿𝙖𝙣𝙜𝙚𝙧𝙗𝙤𝙩*\n\n💡 _Scrivi:_ ${usedPrefix + command} nome canzone`);
+  if (!text) return m.reply(`⚡ *𝛥𝐗𝐈𝚶𝐍 𝚩𝚯𝐓*\n\n💡 _Scrivi:_ ${usedPrefix + command} nome canzone`);
 
   try {
     const search = await yts(text);
@@ -17,17 +17,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const url = vid.url;
 
     if (command === 'play') {
-        let infoMsg = `┏━━━━━━━━━━━━━━━━━━━━┓\n`;
-        infoMsg += `   🎧  *𝙋𝙡𝙖𝙮 𝘿𝙖𝙣𝙜𝙚𝙧𝙗𝙤𝙩* 🎧\n`;
-        infoMsg += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-        infoMsg += `◈ 📌 *𝗧𝗶𝘁𝗼𝗹𝗼:* ${vid.title}\n`;
-        infoMsg += `◈ ⏱️ *𝗗𝘂𝗿𝗮𝘁𝗮:* ${vid.timestamp}\n\n`;
-        infoMsg += `*𝗦𝗲𝗹𝗲𝘇𝗶𝗼𝗻𝗮 𝗶𝗹 𝗳𝗼𝗿𝗺𝗮𝘁𝗼:*`;
+        let infoMsg = `┏━━━━━━━━━━━━━━━━━━━┓\n` +
+                      `   🎧  *𝙋𝙡𝙖𝙮 𝚫𝚩𝐘𝐒𝐒* 🎧\n` +
+                      `┗━━━━━━━━━━━━━━━━━━━┛\n\n` +
+                      `◈ 📌 *𝗧𝗶𝘁𝗼𝗹𝗼:* ${vid.title}\n` +
+                      `◈ ⏱️ *𝗗𝘂𝗿𝗮𝘁𝗮:* ${vid.timestamp}\n\n` +
+                      `*𝗦𝗲𝗹𝗲𝘇𝗶𝗼𝗻𝗮 𝗶𝗹 𝗳𝗼𝗿𝗺𝗮𝘁𝗼:*`;
 
         return await conn.sendMessage(m.chat, {
             image: { url: vid.thumbnail },
             caption: infoMsg,
-            footer: '𝙋𝙡𝙖𝙮 𝘿𝙖𝙣𝙜𝙚𝙧𝙗𝙤𝙩',
+            footer: '\n𝚫𝚩𝐘𝐒𝐒 𝚩𝚯𝐓',
             buttons: [
                 { buttonId: `${usedPrefix}playaud ${url}`, buttonText: { displayText: '🎵 𝗔𝗨𝗗𝗜𝗢 (𝗠𝗣𝟯)' }, type: 1 },
                 { buttonId: `${usedPrefix}playvid ${url}`, buttonText: { displayText: '🎬 𝗩𝗜𝗗𝗘𝗢 (𝗠𝗣𝟰)' }, type: 1 }
@@ -36,64 +36,74 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }, { quoted: m });
     }
 
-    await conn.sendMessage(m.chat, { react: { text: "⚡", key: m.key } });
+    await conn.sendMessage(m.chat, { react: { text: "🎵", key: m.key } });
 
     let downloadUrl = null;
     const isAudio = command === 'playaud';
-
-    // Recupero Link (stessa logica tua)
     try {
         let res = isAudio ? await fg.yta(url) : await fg.ytv(url);
         if (res && res.dl_url) downloadUrl = res.dl_url;
-    } catch {
-        let api = isAudio ? 'ytmp3' : 'ytmp4';
-        let res = await fetch(`https://api.vreden.my.id/api/${api}?url=${url}`);
-        let json = await res.json();
-        downloadUrl = json.result?.download?.url || json.result?.url;
+    } catch (e) { console.log("Dylux API failed"); }
+
+    if (!downloadUrl) {
+        try {
+            let api = isAudio ? 'ytmp3' : 'ytmp4';
+            let res = await fetch(`https://api.vreden.my.id/api/${api}?url=${url}`);
+            let json = await res.json();
+            downloadUrl = json.result?.download?.url || json.result?.url;
+        } catch (e) { console.log("Vreden API failed"); }
     }
 
-    if (!downloadUrl) throw new Error();
+    if (!downloadUrl) {
+        throw new Error('APIs failed to provide a download URL');
+    }
 
     const tmpDir = os.tmpdir();
-    const inputPath = path.join(tmpDir, `input_${Date.now()}`);
-    const outputPath = path.join(tmpDir, `output_${Date.now()}.${isAudio ? 'mp3' : 'mp4'}`);
+    const fileName = `file_${Date.now()}`;
+    const inputPath = path.join( tmpDir, `${fileName}.${isAudio ? 'mp3' : 'mp4'}`);
+    const outputPath = path.join(tmpDir, `${fileName}.${isAudio ? 'mp3' : 'mp4'}`);
 
-    // Scarichiamo il file fisicamente nella VPS
-    const res = await fetch(downloadUrl);
-    const arrayBuffer = await res.arrayBuffer();
+    const response = await fetch(downloadUrl);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
     fs.writeFileSync(inputPath, Buffer.from(arrayBuffer));
 
-    if (isAudio) {
-        // TRUCCO: Usiamo FFmpeg per convertire in MP3 standard a 128kbps (compatibile ovunque)
-        await new Promise((resolve, reject) => {
-            exec(`ffmpeg -i ${inputPath} -vn -ar 44100 -ac 2 -b:a 128k ${outputPath}`, (err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+if (isAudio) {
+    const voicePath = path.join(tmpDir, `${fileName}.ogg`)
 
-        await conn.sendMessage(m.chat, {
-            audio: fs.readFileSync(outputPath),
-            mimetype: 'audio/mpeg',
-            fileName: `${vid.title}.mp3`,
-            ptt: false
-        }, { quoted: m });
-    } else {
-        await conn.sendMessage(m.chat, {
-            video: fs.readFileSync(inputPath),
-            mimetype: 'video/mp4',
-            caption: `✅ *𝐒𝐜𝐚𝐫𝐢𝐜𝐚𝐭𝐨 𝐝𝐚 𝙋𝙡𝙖𝙮 𝘿𝙖𝙣𝙜𝙚𝙧𝙗𝙤𝙩*`,
-        }, { quoted: m });
-    }
+    await new Promise((resolve, reject) => {
+        exec(
+            `ffmpeg -hide_banner -loglevel error -y -i "${inputPath}" -map_metadata -1 -vn -ar 48000 -ac 1 -c:a libopus -b:a 64k -application voip -f ogg "${voicePath}"`,
+            (err) => {
+                if (err) reject(err)
+                else resolve()
+            }
+        )
+    })
 
-    // Pulizia file temporanei
+    await conn.sendMessage(m.chat, {
+        audio: fs.readFileSync(voicePath),
+        mimetype: 'audio/ogg; codecs=opus',
+        ptt: true
+    }, { quoted: m })
+
+    if (fs.existsSync(voicePath)) fs.unlinkSync(voicePath)
+
+} else {
+    await conn.sendMessage(m.chat, {
+        video: fs.readFileSync(inputPath),
+        mimetype: 'video/mp4',
+        caption: `✅ *𝐒𝐜𝐚𝐫𝐢𝐜𝐚𝐭𝐨 𝐝𝐚 𝚫𝚩𝐘𝐒𝐒 𝚩𝚯𝐓*`
+    }, { quoted: m })
+}
+
     if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
     if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
     await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
   } catch (e) {
-    console.error(e);
-    m.reply('🚀 *𝙋𝙡𝙖𝙮 𝘿𝙖𝙣𝙜𝙚𝙧𝙗𝙤𝙩 𝙀𝙧𝙧𝙤𝙧:* File non disponibile o server offline.');
+    console.error("Handler Error:", e.message);
+    m.reply('🚀 *𝙋𝙡𝙖𝙮 𝙀𝙧𝙧𝙤𝙧:* Al momento i server di download sono sovraccarichi. Riprova tra poco.');
   }
 };
 
